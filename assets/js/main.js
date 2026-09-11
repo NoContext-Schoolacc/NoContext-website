@@ -1,4 +1,4 @@
-// Load the shared visual theme before revealing the page so the old purple base stylesheet never flashes first.
+// Load the shared visual theme before revealing the page so the base stylesheet never flashes first.
 (() => {
     const baseStylesheet = document.querySelector('link[href*="assets/css/style.css"]');
     if (!baseStylesheet) return;
@@ -11,17 +11,31 @@
 
     const theme = document.createElement('link');
     theme.rel = 'stylesheet';
-    theme.href = new URL('theme.css?v=ui4', baseStylesheet.href).href;
+    theme.href = new URL('theme.css?v=ui5', baseStylesheet.href).href;
 
+    const palette = document.createElement('link');
+    palette.rel = 'stylesheet';
+    palette.href = new URL('palette.css?v=visual1', baseStylesheet.href).href;
+
+    let themeReady = false;
+    let paletteReady = false;
     const reveal = () => {
+        if (!themeReady || !paletteReady) return;
         document.documentElement.classList.remove('nc-theme-pending');
         guard.remove();
     };
 
-    theme.addEventListener('load', reveal, { once: true });
-    theme.addEventListener('error', reveal, { once: true });
+    theme.addEventListener('load', () => { themeReady = true; reveal(); }, { once: true });
+    theme.addEventListener('error', () => { themeReady = true; reveal(); }, { once: true });
+    palette.addEventListener('load', () => { paletteReady = true; reveal(); }, { once: true });
+    palette.addEventListener('error', () => { paletteReady = true; reveal(); }, { once: true });
+
     document.head.appendChild(theme);
-    window.setTimeout(reveal, 1800);
+    document.head.appendChild(palette);
+    window.setTimeout(() => {
+        document.documentElement.classList.remove('nc-theme-pending');
+        guard.remove();
+    }, 2200);
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Give major content a subtle reveal as it enters the viewport.
     const revealTargets = document.querySelectorAll(
         '.section-title, .features-grid > *, .store-grid > *, .feature-list-detailed > *, .update-entry, .update-card, .card, .product-main, .product-side, .form-card, .ticket-card, .faq-item, .admin-stat, .admin-table-card'
     );
