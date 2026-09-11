@@ -53,3 +53,5 @@ jobs:
             echo 'Potential secret file found in repository.'
             exit 1
           fi
+      - name: Audit local routes and assets
+        run: node scripts/check-routes.mjs
