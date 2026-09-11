@@ -1,0 +1,72 @@
+/* NoContext visual refresh: neutral charcoal + warm amber instead of purple. */
+:root{
+  --accent:#e6a23c;
+  --accent-hover:#f0b85a;
+}
+
+body:before{
+  background:
+    radial-gradient(circle at 15% 5%,rgba(230,162,60,.08),transparent 28%),
+    radial-gradient(circle at 85% 18%,rgba(170,120,55,.055),transparent 25%),
+    radial-gradient(circle at 50% 75%,rgba(230,162,60,.035),transparent 32%),
+    linear-gradient(180deg,#0b0b0c 0%,#08080a 48%,#09090c 100%) !important;
+}
+
+.hero:before,.store-hero:before{
+  background:radial-gradient(circle,rgba(230,162,60,.09),rgba(230,162,60,.025) 38%,transparent 70%) !important;
+}
+.hero:after,.store-hero:after{
+  border-color:rgba(230,162,60,.09) !important;
+  box-shadow:0 0 100px rgba(230,162,60,.045) !important;
+}
+
+.card:hover,.store-card-link:hover{border-color:#403b31 !important}
+.feature-card-modern:after{border-color:rgba(230,162,60,.06) !important}
+
+.form-icon{
+  border-color:rgba(230,162,60,.22) !important;
+  background:rgba(230,162,60,.065) !important;
+  color:#efb65a !important;
+}
+input:focus{box-shadow:0 0 0 3px rgba(230,162,60,.10) !important}
+
+.visual-center i{filter:drop-shadow(0 0 28px rgba(230,162,60,.22)) !important}
+
+.ticket-page{
+  background:
+    radial-gradient(circle at 78% 8%,rgba(230,162,60,.07),transparent 30%),
+    radial-gradient(circle at 12% 55%,rgba(150,105,45,.045),transparent 28%),
+    #08080b !important;
+}
+.ticket-card{box-shadow:0 24px 70px rgba(0,0,0,.32),0 0 0 1px rgba(230,162,60,.018) !important}
+.ticket-card:before{background:linear-gradient(90deg,var(--accent),rgba(230,162,60,.12),transparent) !important}
+.ticket-card:after{background:rgba(230,162,60,.055) !important}
+.ticket-icon{
+  border-color:rgba(230,162,60,.26) !important;
+  background:linear-gradient(145deg,rgba(230,162,60,.12),rgba(230,162,60,.035)) !important;
+  color:#efb65a !important;
+  box-shadow:0 10px 28px rgba(230,162,60,.07),inset 0 1px rgba(255,255,255,.08) !important;
+}
+.ticket-field label i,.ticket-info-list i{color:#d99a36 !important}
+.ticket-field input:focus,.ticket-field select:focus,.ticket-field textarea:focus{
+  border-color:#d99a36 !important;
+  box-shadow:0 0 0 3px rgba(230,162,60,.09),0 10px 30px rgba(0,0,0,.18) !important;
+}
+.ticket-submit{box-shadow:0 10px 28px rgba(230,162,60,.10) !important}
+.ticket-success-action{
+  border-color:rgba(230,162,60,.35) !important;
+  background:rgba(230,162,60,.09) !important;
+  color:#edc277 !important;
+}
+.ticket-success-action:hover{background:rgba(230,162,60,.15) !important;border-color:rgba(230,162,60,.55) !important}
+.account-ticket-item:hover{border-color:rgba(230,162,60,.28) !important}
+.account-ticket-icon{background:rgba(230,162,60,.08) !important;color:#efb65a !important}
+.ticket-message.user{background:rgba(230,162,60,.075) !important;border-color:rgba(230,162,60,.15) !important}
+.ticket-message-author{color:#efb65a !important}
+.ticket-reply textarea:focus{border-color:#d99a36 !important;box-shadow:0 0 0 3px rgba(230,162,60,.09) !important}
+
+.auth-footer a{color:#e5b45f !important}
+
+/* Keep Discord's own blue branding distinct from the site accent. */
+.discord-button{border-color:#5865f2 !important;background:#5865f2 !important}
+.discord-button:hover{background:#6975f5 !important}
