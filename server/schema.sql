@@ -62,9 +62,17 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS discord_oauth_states (
     state_hash CHAR(64) PRIMARY KEY,
+    code_verifier VARCHAR(128),
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+ALTER TABLE users ALTER COLUMN password_salt DROP NOT NULL;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS discord_id VARCHAR(32);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS discord_username VARCHAR(100);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_hash VARCHAR(64);
+ALTER TABLE discord_oauth_states ADD COLUMN IF NOT EXISTS code_verifier VARCHAR(128);
 
 CREATE INDEX IF NOT EXISTS licenses_status_idx ON licenses(status);
 CREATE INDEX IF NOT EXISTS licenses_expires_at_idx ON licenses(expires_at);
@@ -75,6 +83,7 @@ CREATE INDEX IF NOT EXISTS client_errors_created_at_idx ON client_errors(created
 CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at);
 CREATE INDEX IF NOT EXISTS discord_oauth_states_expires_at_idx ON discord_oauth_states(expires_at);
+CREATE UNIQUE INDEX IF NOT EXISTS users_discord_id_unique_idx ON users(discord_id) WHERE discord_id IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS licenses_workink_token_unique_idx
     ON licenses(workink_token_hash)
     WHERE workink_token_hash IS NOT NULL;
