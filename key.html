@@ -1,19 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Key | NoContext</title><link rel="stylesheet" href="assets/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Get a verified NoContext software key.">
+    <title>Get Free Key | NoContext</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .key-page{min-height:calc(100vh - 145px);padding:76px 0 90px;display:flex;align-items:center}
+        .key-container{width:min(880px,100%);margin:auto}
+        .key-header{text-align:center;max-width:680px;margin:0 auto 34px}
+        .key-eyebrow{display:inline-flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid rgba(124,77,255,.25);border-radius:999px;background:rgba(124,77,255,.07);color:#b9a6ff;font-size:.7rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+        .key-eyebrow i{font-size:.65rem}
+        .key-header h1{margin-top:18px;font-size:clamp(2.5rem,6vw,4.7rem)}
+        .key-header p{margin:16px auto 0;max-width:610px;font-size:1rem}
+        .key-flow{max-width:720px;margin:auto}
+        .state-card{position:relative;overflow:hidden;padding:34px;background:linear-gradient(180deg,rgba(20,20,25,.96),rgba(11,11,14,.96));border:1px solid rgba(255,255,255,.08);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.34)}
+        .state-card:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0,rgba(124,77,255,.1),transparent 42%);pointer-events:none}
+        .state-card>*{position:relative}
+        .state-top{text-align:center;margin-bottom:26px}
+        .form-icon{width:58px;height:58px;display:grid;place-items:center;margin:0 auto 18px;border:1px solid rgba(124,77,255,.28);border-radius:16px;background:rgba(124,77,255,.09);color:#a98cff;font-size:1.25rem}
+        .state-card h2{font-size:clamp(1.7rem,4vw,2.3rem)}
+        .state-card .state-copy{max-width:520px;margin:9px auto 0;font-size:.92rem}
+        .choice-list{display:grid;gap:11px;margin-top:28px}
+        .choice-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 18px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(8,8,11,.65);color:var(--text-main);text-align:left;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+        .choice-btn:hover{transform:translateY(-2px);border-color:rgba(124,77,255,.5);background:rgba(124,77,255,.07)}
+        .choice-btn span{display:grid;gap:3px}
+        .choice-btn strong{font-size:.98rem}
+        .choice-btn small{color:var(--text-muted);font-size:.78rem}
+        .choice-btn i{color:var(--accent)}
+        .verification-box{margin-top:28px;padding:17px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.02)}
+        .verification-row{display:flex;align-items:center;gap:12px}
+        .verification-step{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:rgba(124,77,255,.12);border:1px solid rgba(124,77,255,.26);color:#b9a6ff;font-size:.78rem;font-weight:800;flex:none}
+        .verification-box strong{display:block;font-size:.9rem}
+        .verification-box span{display:block;margin-top:2px;color:var(--text-muted);font-size:.78rem}
+        .form-submit{width:100%;margin-top:14px}
+        .small-muted{text-align:center;margin-top:13px;color:#6f6f78;font-size:.76rem}
+        .success-card{text-align:center}
+        .success-mark,.error-mark{width:64px;height:64px;display:grid;place-items:center;margin:0 auto 18px;border-radius:50%;font-size:1.4rem}
+        .success-mark{border:1px solid rgba(74,222,128,.22);background:rgba(74,222,128,.08);color:var(--success)}
+        .error-mark{border:1px solid rgba(248,113,113,.22);background:rgba(248,113,113,.08);color:var(--error)}
+        .key-display{margin:23px 0 12px;padding:18px 16px;border:1px dashed rgba(124,77,255,.36);border-radius:14px;background:#09090c;color:#eee;font:700 1rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.07em;word-break:break-all}
+        .success-note{display:flex;align-items:flex-start;gap:9px;margin:18px auto 0;max-width:460px;padding:12px 13px;border-radius:11px;background:rgba(74,222,128,.05);color:#9cbfa6;font-size:.76rem;text-align:left}
+        .success-note i{margin-top:2px;color:var(--success)}
+        .loading-spinner{width:34px;height:34px;margin:25px auto 2px;border:3px solid rgba(255,255,255,.08);border-top-color:var(--accent);border-radius:50%;animation:keySpin .8s linear infinite}
+        .state-footer{margin-top:18px;text-align:center;color:#676771;font-size:.76rem}
+        .state-footer a{color:#a997e8}
+        @keyframes keySpin{to{transform:rotate(360deg)}}
+        @media(max-width:700px){.key-page{padding:55px 0 70px}.state-card{padding:25px 19px}.key-header{margin-bottom:24px}.key-header h1{font-size:2.45rem}.choice-btn{padding:15px}.key-display{font-size:.85rem}}
+    </style>
 </head>
 <body>
-<nav><div class="container"><a href="index.html" class="logo"><i class="fas fa-cube"></i> NoContext</a><ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="store.html">Store</a></li><li><a href="account.html">License</a></li></ul></div></nav>
-<main class="page-shell"><div class="container narrow-container"><div class="page-kicker">ACCESS / 01</div><h1 class="page-title">Get a free key</h1><p class="page-lead">Select the software you want access to and follow the verification flow.</p>
-<div class="key-flow">
-<div id="loading-state" class="card state-card text-center" style="display:none"><div class="form-icon"><i class="fas fa-spinner"></i></div><h2>Verifying completion</h2><p>Please wait while your verification is checked.</p><div class="loading-spinner"></div></div>
-<div id="selection-state" class="card state-card"><div class="form-icon"><i class="fas fa-layer-group"></i></div><h2>Select software</h2><p>Choose which software you need a key for.</p><div class="choice-list"><button class="choice-btn" onclick="selectProduct('external')"><span><strong>NoContext External</strong><small>Available now</small></span><i class="fas fa-arrow-right"></i></button><button class="choice-btn" onclick="selectProduct('executor')"><span><strong>NoContext Executor</strong><small>Coming soon</small></span><i class="fas fa-arrow-right"></i></button></div></div>
-<div id="ready-state" class="card state-card" style="display:none"><div class="form-icon"><i class="fas fa-key"></i></div><h2 id="product-title">Free key</h2><p>Complete the verification step to receive temporary access for <span id="product-name" class="text-gradient">Product</span>.</p><a id="workink-link" href="https://work.ink/your-link-here" class="btn btn-primary form-submit">Start verification <i class="fas fa-arrow-right"></i></a><p class="small-muted">You will be returned here after completion.</p><div class="demo-panel"><span>Demo mode</span><a href="?token=demo-success" class="btn btn-outline">Simulate success</a></div></div>
-<div id="success-state" class="card state-card text-center" style="display:none"><div class="success-mark"><i class="fas fa-check"></i></div><h2>Key generated</h2><p>Your temporary license key is ready.</p><div class="key-display" id="generated-key">---- ---- ---- ----</div><button class="btn btn-primary form-submit" onclick="copyKey(this)">Copy key <i class="fas fa-copy"></i></button><a href="account.html" class="btn btn-outline form-submit">Check status</a></div>
-<div id="error-state" class="card state-card text-center" style="display:none"><div class="error-mark"><i class="fas fa-xmark"></i></div><h2>Verification failed</h2><p id="error-message">We couldn't verify the request. Please try again.</p><a href="key.html" class="btn btn-primary form-submit">Try again</a></div>
-</div></div></main>
-<footer><div class="container"><p>&copy; 2026 NoContext. All rights reserved.</p></div></footer>
-<script src="assets/js/api.js"></script><script src="assets/js/main.js"></script><script src="assets/js/key.js"></script>
-</body></html>
+<nav>
+    <div class="container">
+        <a href="index.html" class="logo"><i class="fas fa-cube"></i> NoContext</a>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="store.html">Store</a></li>
+            <li><a href="account.html">License</a></li>
+        </ul>
+    </div>
+</nav>
+
+<main class="key-page">
+    <div class="container key-container">
+        <header class="key-header">
+            <div class="key-eyebrow"><i class="fas fa-shield-halved"></i> Verified access</div>
+            <h1>Get your free key</h1>
+            <p>Select your software, complete the verification step, and return here to receive your temporary license.</p>
+        </header>
+
+        <div class="key-flow">
+            <section id="selection-state" class="card state-card">
+                <div class="state-top">
+                    <div class="form-icon"><i class="fas fa-cubes"></i></div>
+                    <h2>Select software</h2>
+                    <p class="state-copy">Choose the product you want to activate.</p>
+                </div>
+                <div class="choice-list">
+                    <button class="choice-btn" type="button" onclick="selectProduct('external')">
+                        <span><strong>NoContext External</strong><small>Available now · Free key</small></span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="choice-btn" type="button" onclick="selectProduct('executor')">
+                        <span><strong>NoContext Executor</strong><small>Coming soon</small></span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                <div class="state-footer">Keys are verified server-side before they are issued.</div>
+            </section>
+
+            <section id="ready-state" class="card state-card" style="display:none">
+                <div class="state-top">
+                    <div class="form-icon"><i class="fas fa-key"></i></div>
+                    <h2 id="product-title">Free key</h2>
+                    <p class="state-copy">Complete verification to generate a temporary key for <strong id="product-name">Product</strong>.</p>
+                </div>
+                <div class="verification-box">
+                    <div class="verification-row">
+                        <div class="verification-step">1</div>
+                        <div><strong>Complete verification</strong><span>Use the official verification link below.</span></div>
+                    </div>
+                    <a id="workink-link" href="#" class="btn btn-primary form-submit" rel="noopener noreferrer">Start verification <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <p class="small-muted">After completion, you will be returned here automatically.</p>
+                <div class="state-footer"><a href="key.html">Change product</a></div>
+            </section>
+
+            <section id="loading-state" class="card state-card text-center" style="display:none">
+                <div class="state-top">
+                    <div class="form-icon"><i class="fas fa-shield-halved"></i></div>
+                    <h2>Checking verification</h2>
+                    <p class="state-copy">We're securely validating your completed verification.</p>
+                </div>
+                <div class="loading-spinner" aria-hidden="true"></div>
+                <div class="state-footer">Please keep this page open.</div>
+            </section>
+
+            <section id="success-state" class="card state-card success-card" style="display:none">
+                <div class="success-mark"><i class="fas fa-check"></i></div>
+                <h2>Key generated</h2>
+                <p class="state-copy">Your temporary license has been verified and is ready to use.</p>
+                <div class="key-display" id="generated-key">---- ---- ---- ----</div>
+                <button class="btn btn-primary form-submit" type="button" onclick="copyKey(this)">Copy key <i class="fas fa-copy"></i></button>
+                <a href="account.html" class="btn btn-outline form-submit">Check license status <i class="fas fa-arrow-right"></i></a>
+                <div class="success-note"><i class="fas fa-circle-info"></i><span>Keep this key private. It is tied to the product and validity period issued by the server.</span></div>
+            </section>
+
+            <section id="error-state" class="card state-card text-center" style="display:none">
+                <div class="error-mark"><i class="fas fa-xmark"></i></div>
+                <h2>Verification failed</h2>
+                <p id="error-message" class="state-copy">We couldn't verify the request. Please try again.</p>
+                <a href="key.html" class="btn btn-primary form-submit">Try again <i class="fas fa-rotate-right"></i></a>
+                <div class="state-footer">Need help? Return to the <a href="store.html">store</a>.</div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container"><p>&copy; 2026 NoContext. All rights reserved.</p></div>
+</footer>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/main.js"></script>
+<script src="assets/js/key.js"></script>
+</body>
+</html>
