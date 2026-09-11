@@ -11,7 +11,7 @@
 
     const theme = document.createElement('link');
     theme.rel = 'stylesheet';
-    theme.href = new URL('theme.css?v=ui3', baseStylesheet.href).href;
+    theme.href = new URL('theme.css?v=ui4', baseStylesheet.href).href;
 
     const reveal = () => {
         document.documentElement.classList.remove('nc-theme-pending');
@@ -55,6 +55,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Give major content a subtle reveal as it enters the viewport.
+    const revealTargets = document.querySelectorAll(
+        '.section-title, .features-grid > *, .store-grid > *, .feature-list-detailed > *, .update-entry, .update-card, .card, .product-main, .product-side, .form-card, .ticket-card, .faq-item, .admin-stat, .admin-table-card'
+    );
+
+    revealTargets.forEach((element, index) => {
+        if (element.classList.contains('nc-reveal')) return;
+        element.classList.add('nc-reveal');
+        const delay = Math.min((index % 5) + 1, 4);
+        element.classList.add(`nc-delay-${delay}`);
+    });
+
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('nc-visible');
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px' });
+
+        revealTargets.forEach(element => observer.observe(element));
+    } else {
+        revealTargets.forEach(element => element.classList.add('nc-visible'));
+    }
 });
 
 async function copyToClipboard(text, btnElement) {
