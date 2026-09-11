@@ -27,7 +27,7 @@
         <header class="auth-brand">
             <div class="store-eyebrow">NOCONTEXT / ACCOUNT</div>
             <h1>Your account,<br><span>your access.</span></h1>
-            <p>Sign in to your NoContext account or create a new one.</p>
+            <p>Sign in with your NoContext account or use Discord for a faster sign-in.</p>
         </header>
 
         <section class="auth-card" aria-labelledby="auth-title">
@@ -35,6 +35,14 @@
                 <button id="login-tab" class="auth-tab active" type="button" role="tab" aria-selected="true">Sign in</button>
                 <button id="register-tab" class="auth-tab" type="button" role="tab" aria-selected="false">Register</button>
             </div>
+
+            <button id="discord-login" class="discord-button" type="button">
+                <i class="fab fa-discord" aria-hidden="true"></i>
+                <span>Continue with Discord</span>
+                <i class="fas fa-arrow-right discord-arrow" aria-hidden="true"></i>
+            </button>
+
+            <div class="auth-or"><span>or use username</span></div>
 
             <div class="form-card-heading">
                 <div class="form-icon"><i class="fas fa-user-shield"></i></div>
@@ -73,6 +81,7 @@
         <div class="auth-security">
             <span><i class="fas fa-lock"></i> Secure session cookie</span>
             <span><i class="fas fa-shield-halved"></i> Passwords hashed server-side</span>
+            <span><i class="fab fa-discord"></i> Discord OAuth2</span>
         </div>
     </div>
 </main>
