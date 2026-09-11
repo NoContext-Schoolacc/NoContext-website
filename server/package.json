@@ -1,10 +1,10 @@
 {
   "name": "nocontext-backend",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "engines": { "node": ">=20" },
-  "scripts": { "start": "node index.js", "dev": "node --watch index.js" },
+  "scripts": { "start": "node --import ./tickets-loader.js index.js", "dev": "node --watch --import ./tickets-loader.js index.js" },
   "dependencies": {
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
