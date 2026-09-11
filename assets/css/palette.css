@@ -1,4 +1,4 @@
-/* NoContext visual refresh v3 — graphite / indigo foundation. */
+/* NoContext visual refresh v4 — graphite / indigo foundation + cross-page transitions. */
 :root{--accent:#8b7cf6;--accent-hover:#a99cff;--accent-soft:rgba(139,124,246,.11);--accent-line:rgba(139,124,246,.28);--bg-dark:#090a0d;--bg-card:#11141a;--bg-card-2:#151922;--text-main:#f4f4f5;--text-muted:#9a9ca6;--border:rgba(255,255,255,.085);--border-strong:rgba(255,255,255,.16);--shadow:0 24px 70px rgba(0,0,0,.34)}
 *{scrollbar-color:rgba(139,124,246,.42) #090a0d;scrollbar-width:thin}
 body{background:#090a0d!important;color:var(--text-main)!important}
@@ -40,4 +40,11 @@ footer a:hover{color:#fff!important}
 .visual-center i{color:var(--accent)!important}
 /* Keep the new visual language stable across older component selectors. */
 [class*="accent"],.accent,.highlight{color:var(--accent)!important}
+/* Native cross-document View Transitions make internal navigation feel like one app. */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.38s;animation-timing-function:cubic-bezier(.22,.61,.36,1)}
+::view-transition-old(root){animation-name:nc-page-out}
+::view-transition-new(root){animation-name:nc-page-in}
+@keyframes nc-page-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(-4px) scale(.998)}}
+@keyframes nc-page-in{from{opacity:0;transform:translateY(4px) scale(.998)}to{opacity:1;transform:none}}
 @media(max-width:760px){.container{width:min(100% - 28px,1160px)!important}.nav-links{gap:2px!important}.nav-links a{padding:7px 8px!important}.hero,.store-hero{padding-top:88px!important}.section,.page-shell{padding:68px 0!important}}
