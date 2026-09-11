@@ -15,18 +15,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const productParam = urlParams.get('product');
 
     if (token) {
+        const product = productParam && PRODUCT_CONFIG[productParam] ? productParam : 'external';
         showState('loading');
 
         try {
-            const response = await ApiService.claimFreeKey(token);
-            if (response.success) {
-                document.getElementById('generated-key').innerText = response.key;
+            const response = await ApiService.claimFreeKey(token, product);
+            if (response.success && response.key) {
+                document.getElementById('generated-key').textContent = response.key;
                 showState('success');
             } else {
-                showError(response.message || 'Verification failed.');
+                showError(response.error || 'Verification failed.');
             }
-        } catch (err) {
-            showError(err.message);
+        } catch {
+            showError('Verification could not be completed. Please try again.');
         }
     } else if (productParam && PRODUCT_CONFIG[productParam]) {
         selectProduct(productParam);
@@ -39,8 +40,8 @@ function selectProduct(type) {
     const config = PRODUCT_CONFIG[type];
     if (!config) return;
 
-    document.getElementById('product-title').innerText = config.name;
-    document.getElementById('product-name').innerText = config.name;
+    document.getElementById('product-title').textContent = config.name;
+    document.getElementById('product-name').textContent = config.name;
     document.getElementById('workink-link').href = config.url;
 
     showState('ready');
@@ -53,15 +54,16 @@ function showState(state) {
     document.getElementById('success-state').style.display = 'none';
     document.getElementById('error-state').style.display = 'none';
 
-    document.getElementById(`${state}-state`).style.display = 'block';
+    const target = document.getElementById(`${state}-state`);
+    if (target) target.style.display = 'block';
 }
 
 function showError(msg) {
-    document.getElementById('error-message').innerText = msg;
+    document.getElementById('error-message').textContent = msg;
     showState('error');
 }
 
 function copyKey(btn) {
-    const key = document.getElementById('generated-key').innerText;
+    const key = document.getElementById('generated-key').textContent;
     copyToClipboard(key, btn);
 }
