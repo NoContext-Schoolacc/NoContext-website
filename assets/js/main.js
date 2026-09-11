@@ -1,8 +1,11 @@
-// Load the shared visual theme so every page gets the same neutral palette.
+// Load the shared visual theme from the existing style.css location so every page gets the same design.
 (() => {
+    const baseStylesheet = document.querySelector('link[href*="assets/css/style.css"]');
+    if (!baseStylesheet) return;
+
     const theme = document.createElement('link');
     theme.rel = 'stylesheet';
-    theme.href = `${new URL('.', document.baseURI)}assets/css/theme.css`;
+    theme.href = new URL('theme.css', baseStylesheet.href).href;
     document.head.appendChild(theme);
 })();
 
