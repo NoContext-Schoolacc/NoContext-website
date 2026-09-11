@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+    <title>Login | NoContext</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body class="auth-page">
+<nav>
+    <div class="container">
+        <a href="../" class="logo"><i class="fas fa-cube"></i> NoContext</a>
+        <ul class="nav-links">
+            <li><a href="../store/">Store</a></li>
+            <li><a href="../key/">Free Key</a></li>
+            <li><a href="../account/">License</a></li>
+        </ul>
+    </div>
+</nav>
+
+<main class="auth-main">
+    <div class="container auth-wrap">
+        <header class="auth-brand">
+            <div class="store-eyebrow">NOCONTEXT / ACCOUNT</div>
+            <h1>Your account,<br><span>your access.</span></h1>
+            <p>Sign in to your NoContext account or create a new one.</p>
+        </header>
+
+        <section class="auth-card" aria-labelledby="auth-title">
+            <div class="auth-tabs" role="tablist" aria-label="Account access">
+                <button id="login-tab" class="auth-tab active" type="button" role="tab" aria-selected="true">Sign in</button>
+                <button id="register-tab" class="auth-tab" type="button" role="tab" aria-selected="false">Register</button>
+            </div>
+
+            <div class="form-card-heading">
+                <div class="form-icon"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <h2 id="auth-title">Welcome back</h2>
+                    <p>Use your NoContext username and password.</p>
+                </div>
+            </div>
+
+            <form id="auth-form" class="auth-form" novalidate>
+                <div class="auth-field">
+                    <label for="auth-username">Username</label>
+                    <input id="auth-username" name="username" type="text" autocomplete="username" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" placeholder="Your username" required>
+                    <span class="auth-help">3-24 characters. Letters, numbers, and underscores only.</span>
+                </div>
+
+                <div class="auth-field">
+                    <label for="auth-password">Password</label>
+                    <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="10" maxlength="128" placeholder="Your password" required>
+                    <span class="auth-help">Use at least 10 characters. Never reuse an important password.</span>
+                </div>
+
+                <div id="confirm-password-wrap" class="auth-field" hidden>
+                    <label for="auth-confirm-password">Confirm password</label>
+                    <input id="auth-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" placeholder="Repeat your password">
+                </div>
+
+                <button id="auth-submit" class="btn btn-primary auth-submit" type="submit">Sign in <i class="fas fa-arrow-right"></i></button>
+                <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+            </form>
+
+            <div class="auth-divider"><span>Account security</span></div>
+            <div class="auth-footer"><span id="auth-switch-text">Need an account?</span> <a id="auth-switch-link" href="#" data-mode="register">Create one</a></div>
+        </section>
+
+        <div class="auth-security">
+            <span><i class="fas fa-lock"></i> Secure session cookie</span>
+            <span><i class="fas fa-shield-halved"></i> Passwords hashed server-side</span>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <div class="container"><p>&copy; 2026 NoContext. All rights reserved.</p></div>
+</footer>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+</body>
+</html>
