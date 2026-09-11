@@ -1,9 +1,12 @@
 const state = {
     mode: 'login',
-    busy: false
+    busy: false,
+    discordMessage: false
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+const PASSWORD_MIN_LENGTH = 15;
+
+ document.addEventListener('DOMContentLoaded', () => {
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
     const form = document.getElementById('auth-form');
@@ -88,8 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage('Username must be 3-24 characters using letters, numbers, or underscores.');
             return;
         }
-        if (passwordValue.length < 10 || passwordValue.length > 128) {
-            showMessage('Password must be 10-128 characters long.');
+        if (passwordValue.length < PASSWORD_MIN_LENGTH || passwordValue.length > 128) {
+            showMessage(`Password must be ${PASSWORD_MIN_LENGTH}-128 characters long.`);
             return;
         }
         if (state.mode === 'register' && passwordValue !== confirmPassword.value) {
