@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://nocontext-schoolacc.github.io/NoContext-website/sitemap.xml
