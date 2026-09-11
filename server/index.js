@@ -10,6 +10,7 @@ const port = Number(process.env.PORT || 3000);
 const nodeEnv = process.env.NODE_ENV || 'development';
 const publicOriginInput = process.env.PUBLIC_ORIGIN || '';
 const hmacSecret = process.env.LICENSE_HMAC_SECRET;
+const adminApiKey = process.env.ADMIN_API_KEY;
 const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
 
 if (!hmacSecret || hmacSecret.length < 32) {
@@ -17,6 +18,9 @@ if (!hmacSecret || hmacSecret.length < 32) {
 }
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL must be configured.');
+}
+if (adminApiKey && adminApiKey.length < 32) {
+    throw new Error('ADMIN_API_KEY must be at least 32 characters when configured.');
 }
 if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0 || trustProxyHops > 5) {
     throw new Error('TRUST_PROXY_HOPS must be an integer from 0 to 5.');
@@ -94,8 +98,8 @@ if (publicOrigin) {
         }
         if (origin) res.setHeader('Access-Control-Allow-Origin', publicOrigin);
         res.setHeader('Vary', 'Origin');
-        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         if (req.method === 'OPTIONS') return res.sendStatus(204);
         next();
     });
@@ -133,8 +137,43 @@ const healthLimiter = rateLimit({
     message: { ok: false, error: 'Too many health checks. Try again later.' }
 });
 
+const adminLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000,
+    limit: 60,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many admin requests. Try again later.' }
+});
+
+const telemetryLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    limit: 30,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many telemetry events.' }
+});
+
 function digest(value) {
     return crypto.createHmac('sha256', hmacSecret).update(value).digest('hex');
+}
+
+function safeEqual(left, right) {
+    const leftBuffer = Buffer.from(left);
+    const rightBuffer = Buffer.from(right);
+    return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+function requireAdmin(req, res, next) {
+    if (!adminApiKey) return res.status(503).json({ success: false, error: 'Admin API is not configured.' });
+
+    const authorization = req.get('authorization') || '';
+    const match = /^Bearer\s+(.+)$/i.exec(authorization);
+    if (!match || !safeEqual(match[1], adminApiKey)) {
+        return res.status(401).json({ success: false, error: 'Unauthorized.' });
+    }
+
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    next();
 }
 
 function generateLicenseKey() {
@@ -329,6 +368,78 @@ app.post('/api/store/checkout', checkoutLimiter, async (req, res) => {
         success: false,
         error: 'Checkout is not configured on the backend.'
     });
+});
+
+app.post('/api/telemetry/client-error', telemetryLimiter, async (req, res) => {
+    const message = typeof req.body?.message === 'string' ? req.body.message.slice(0, 500).replace(/https?:\/\/\S+/gi, '[url]') : '';
+    const page = typeof req.body?.page === 'string' ? req.body.page.slice(0, 160) : '';
+    const kind = typeof req.body?.kind === 'string' ? req.body.kind.slice(0, 32) : 'error';
+    const ipHash = digest(req.ip || 'unknown');
+
+    if (!message) return res.status(400).json({ success: false, error: 'Invalid telemetry event.' });
+
+    try {
+        console.warn('Client error telemetry:', {
+            kind,
+            message,
+            page,
+            ipHash
+        });
+        return res.status(202).json({ success: true });
+    } catch {
+        return res.status(500).json({ success: false });
+    }
+});
+
+app.get('/api/admin/overview', adminLimiter, requireAdmin, async (_req, res) => {
+    try {
+        const [statsResult, recentResult] = await Promise.all([
+            pool.query(`
+                SELECT
+                    COUNT(*)::int AS total,
+                    COUNT(*) FILTER (WHERE status = 'active' AND expires_at > NOW())::int AS active,
+                    COUNT(*) FILTER (WHERE status = 'expired' OR (status = 'active' AND expires_at <= NOW()))::int AS expired,
+                    COUNT(*) FILTER (WHERE status = 'revoked')::int AS revoked
+                FROM licenses
+            `),
+            pool.query(`
+                SELECT id, product_id, status, expires_at, claimed_at, created_at, last_validated_at
+                FROM licenses
+                ORDER BY created_at DESC
+                LIMIT 100
+            `)
+        ]);
+
+        return res.json({
+            success: true,
+            stats: statsResult.rows[0],
+            licenses: recentResult.rows
+        });
+    } catch {
+        return res.status(500).json({ success: false, error: 'Unable to load admin data.' });
+    }
+});
+
+app.post('/api/admin/licenses/revoke', adminLimiter, requireAdmin, async (req, res) => {
+    const licenseId = Number(req.body?.licenseId);
+    if (!Number.isSafeInteger(licenseId) || licenseId <= 0) {
+        return res.status(400).json({ success: false, error: 'Invalid license ID.' });
+    }
+
+    try {
+        const result = await pool.query(
+            `UPDATE licenses
+             SET status = 'revoked'
+             WHERE id = $1 AND status <> 'revoked'
+             RETURNING id, status`,
+            [licenseId]
+        );
+
+        if (!result.rowCount) return res.status(404).json({ success: false, error: 'License not found.' });
+        return res.json({ success: true, license: result.rows[0] });
+    } catch {
+        return res.status(500).json({ success: false, error: 'Unable to revoke license.' });
+    }
 });
 
 app.use((_req, res) => res.status(404).json({ success: false, error: 'Not found.' }));
