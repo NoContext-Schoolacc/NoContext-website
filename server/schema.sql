@@ -29,11 +29,21 @@ CREATE TABLE IF NOT EXISTS claim_attempts (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS client_errors (
+    id BIGSERIAL PRIMARY KEY,
+    kind VARCHAR(32) NOT NULL,
+    message VARCHAR(500) NOT NULL,
+    page VARCHAR(160) NOT NULL,
+    ip_hash CHAR(64) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS licenses_status_idx ON licenses(status);
 CREATE INDEX IF NOT EXISTS licenses_expires_at_idx ON licenses(expires_at);
 CREATE INDEX IF NOT EXISTS claim_attempts_token_idx ON claim_attempts(token_hash);
 CREATE INDEX IF NOT EXISTS claim_attempts_created_at_idx ON claim_attempts(created_at);
 CREATE INDEX IF NOT EXISTS claim_locks_created_at_idx ON claim_locks(created_at);
+CREATE INDEX IF NOT EXISTS client_errors_created_at_idx ON client_errors(created_at);
 CREATE UNIQUE INDEX IF NOT EXISTS licenses_workink_token_unique_idx
     ON licenses(workink_token_hash)
     WHERE workink_token_hash IS NOT NULL;
