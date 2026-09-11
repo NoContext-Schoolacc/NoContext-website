@@ -9,23 +9,27 @@
 <meta property="og:description" content="Contact NoContext support and submit a support ticket.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="../assets/css/style.css?v=contact7">
+<link rel="stylesheet" href="../assets/css/ticket.css?v=1">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
-<body>
+<body class="ticket-page">
 <nav aria-label="Primary navigation"><div class="container">
 <a href="../" class="logo" aria-label="NoContext home">◆ NoContext</a>
 <ul class="nav-links"><li><a href="../">Home</a></li><li><a href="../#features">Features</a></li><li><a href="../store/">Store</a></li><li><a href="../about/">About</a></li><li><a href="../updates/">Updates</a></li><li><a href="../faq/">FAQ</a></li><li><a href="./" aria-current="page">Contact</a></li></ul>
 <a href="../key/" class="btn btn-primary">Get Started</a>
 </div></nav>
-<header class="hero"><div class="container"><span class="home-kicker">CONTACT</span><h1>Need<br><span>help?</span></h1><p>Get answers or submit a support ticket directly from this page.</p></div></header>
-<section class="section"><div class="container ticket-panel"><div class="card"><div class="form-card-heading"><div class="form-icon"><i class="fas fa-ticket"></i></div><div><h2>Support ticket</h2><p>Submit an issue and it will open in the NoContext support tracker.</p></div></div>
-<form id="contact-ticket-form" class="ticket-form" novalidate>
-<div class="ticket-grid"><div class="ticket-field"><label for="ticket-category">Category</label><select id="ticket-category"><option>Account</option><option>License</option><option>Website</option><option>Other</option></select></div><div class="ticket-field"><label for="ticket-priority">Priority</label><select id="ticket-priority"><option>Normal</option><option>High</option></select></div></div>
-<div class="ticket-field"><label for="ticket-subject">Subject</label><input id="ticket-subject" maxlength="120" required placeholder="What do you need help with?"></div>
-<div class="ticket-field"><label for="ticket-description">Description</label><textarea id="ticket-description" maxlength="4000" required placeholder="Explain what happened and include useful steps or error messages. Do not include passwords, API keys, or other secrets."></textarea><span class="ticket-help">Never include passwords, session tokens, API keys, or other private credentials.</span></div>
-<button class="btn btn-primary" type="submit">Submit ticket <i class="fas fa-paper-plane"></i></button>
+<header class="hero ticket-hero"><div class="container"><span class="home-kicker">CONTACT</span><h1>Need<br><span>help?</span></h1><p>Get answers or submit a support ticket directly from this page.</p></div></header>
+<section class="section"><div class="container ticket-layout">
+<div class="card ticket-card"><div class="form-card-heading"><div class="ticket-icon"><i class="fas fa-ticket"></i></div><div><h2>Support ticket</h2><p>Usually takes less than a minute.</p></div></div>
+<form id="contact-ticket-form" class="ticket-form ticket-fields" novalidate>
+<div class="ticket-row"><div class="ticket-field"><label for="ticket-category"><i class="fas fa-layer-group"></i>Category</label><select id="ticket-category"><option>Account</option><option>License</option><option>Website</option><option>Other</option></select></div><div class="ticket-field"><label for="ticket-priority"><i class="fas fa-flag"></i>Priority</label><select id="ticket-priority"><option>Normal</option><option>High</option></select></div></div>
+<div class="ticket-field"><label for="ticket-subject"><i class="fas fa-heading"></i>Subject</label><input id="ticket-subject" maxlength="120" required placeholder="What do you need help with?"></div>
+<div class="ticket-field"><label for="ticket-description"><i class="fas fa-align-left"></i>Description</label><textarea id="ticket-description" maxlength="4000" required placeholder="Explain what happened and include useful steps or error messages."></textarea></div>
+<button class="btn btn-primary ticket-submit" type="submit">Submit ticket <i class="fas fa-arrow-right"></i></button>
 <p id="ticket-error" class="ticket-error" role="alert" hidden></p><div id="ticket-success" class="ticket-success" hidden></div>
-</form></div></div></section>
+</form></div>
+<aside class="ticket-sidebar" aria-label="Support information"><div class="ticket-info"><div class="ticket-tracker"><span class="ticket-tracker-dot"></span>Support tracker online</div><h3>Before you submit</h3><ul class="ticket-info-list"><li><i class="fas fa-list-check"></i><span>Pick the category that best matches your issue.</span></li><li><i class="fas fa-magnifying-glass"></i><span>Include useful steps and error messages.</span></li><li><i class="fas fa-bolt"></i><span>Use High priority when the issue is blocking you.</span></li></ul></div><div class="ticket-info"><h3>Keep it private</h3><p>Never include passwords, API keys, session tokens, or other private credentials.</p><div class="ticket-note"><i class="fas fa-shield-halved"></i><span>Your request opens in GitHub so it can be tracked and answered.</span></div></div></aside>
+</div></section>
 <section class="section"><div class="container"><div class="card"><h2>Need a quick answer?</h2><p>Check the FAQ for common questions before opening a ticket.</p><a class="btn btn-outline" href="../faq/">View FAQ</a></div></div></section>
 <footer><div class="container"><a href="../about/">About</a> · <a href="../updates/">Updates</a> · <a href="../faq/">FAQ</a> · <a href="./">Contact</a> · <a href="../privacy/">Privacy</a> · <a href="../terms/">Terms</a></div></footer>
 <script src="../assets/js/contact-ticket.js?v=2" defer></script>
