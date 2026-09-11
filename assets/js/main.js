@@ -11,11 +11,11 @@
 
     const theme = document.createElement('link');
     theme.rel = 'stylesheet';
-    theme.href = new URL('theme.css?v=ui6', baseStylesheet.href).href;
+    theme.href = new URL('theme.css?v=ui7', baseStylesheet.href).href;
 
     const palette = document.createElement('link');
     palette.rel = 'stylesheet';
-    palette.href = new URL('palette.css?v=visual2', baseStylesheet.href).href;
+    palette.href = new URL('palette.css?v=visual3', baseStylesheet.href).href;
 
     let themeReady = false;
     let paletteReady = false;
