@@ -10,6 +10,11 @@ const PRODUCT_CONFIG = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+    document.querySelectorAll('[data-product]').forEach(button => {
+        button.addEventListener('click', () => selectProduct(button.dataset.product));
+    });
+    document.getElementById('copy-key')?.addEventListener('click', event => copyKey(event.currentTarget));
+
     const url = new URL(window.location.href);
     const token = url.searchParams.get('token');
     const productParam = url.searchParams.get('product');
@@ -66,22 +71,22 @@ function selectProduct(type) {
 }
 
 function showState(state) {
-    document.getElementById('selection-state').style.display = 'none';
-    document.getElementById('ready-state').style.display = 'none';
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('success-state').style.display = 'none';
-    document.getElementById('error-state').style.display = 'none';
+    document.querySelectorAll('.key-flow > .state-card').forEach(card => {
+        card.hidden = true;
+    });
 
     const target = document.getElementById(`${state}-state`);
-    if (target) target.style.display = 'block';
+    if (target) target.hidden = false;
 }
 
 function showError(msg) {
-    document.getElementById('error-message').textContent = msg;
+    const errorMessage = document.getElementById('error-message');
+    if (errorMessage) errorMessage.textContent = msg;
     showState('error');
 }
 
 function copyKey(btn) {
-    const key = document.getElementById('generated-key').textContent;
+    const key = document.getElementById('generated-key')?.textContent || '';
+    if (!key || key.includes('----')) return;
     copyToClipboard(key, btn);
 }
