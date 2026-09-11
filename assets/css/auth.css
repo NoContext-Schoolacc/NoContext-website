@@ -1,0 +1,31 @@
+body.auth-page{min-height:100vh;display:flex;flex-direction:column}
+.auth-main{flex:1;display:grid;place-items:center;padding:70px 0 90px}
+.auth-wrap{width:min(100%,460px);margin:auto}
+.auth-brand{text-align:center;margin-bottom:24px}
+.auth-brand .store-eyebrow{margin-bottom:12px}
+.auth-brand h1{font-size:clamp(2.3rem,7vw,4rem);margin-bottom:10px}
+.auth-brand h1 span{color:var(--accent)}
+.auth-brand p{font-size:.94rem}
+.auth-card{padding:30px;background:rgba(17,17,20,.96);border:1px solid var(--border);border-radius:18px;box-shadow:0 28px 80px rgba(0,0,0,.34)}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:#0b0b0e;border:1px solid var(--border);border-radius:12px;margin-bottom:24px}
+.auth-tab{appearance:none;border:0;border-radius:8px;background:transparent;color:var(--text-muted);padding:11px 12px;font-weight:700;cursor:pointer;transition:.2s}
+.auth-tab:hover{color:var(--text-main)}
+.auth-tab.active{background:#18181d;color:var(--text-main);box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.auth-form{display:grid;gap:16px}
+.auth-field{display:grid;gap:8px}
+.auth-field label{margin:0}
+.auth-field input{padding:14px}
+.auth-help{color:#73737d;font-size:.75rem;line-height:1.5}
+.auth-submit{margin-top:2px;width:100%}
+.auth-message{min-height:20px;margin:2px 0 0;font-size:.82rem;line-height:1.5}
+.auth-message.error{color:var(--error)}
+.auth-message.success{color:var(--success)}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:#62626c;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--border);flex:1}
+.auth-footer{text-align:center;color:#6e6e77;font-size:.78rem}
+.auth-footer a{color:#a991ff}
+.auth-security{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:18px;color:#70707a;font-size:.72rem}
+.auth-security span{display:inline-flex;align-items:center;gap:6px}
+.auth-security i{color:var(--accent)}
+.auth-loading{opacity:.7;pointer-events:none}
+@media(max-width:700px){.auth-main{padding:45px 0 65px}.auth-card{padding:22px 18px}.auth-brand h1{font-size:2.55rem}}
