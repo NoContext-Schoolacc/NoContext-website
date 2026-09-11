@@ -1,3 +1,11 @@
+// Load the shared visual theme so every page gets the same neutral palette.
+(() => {
+    const theme = document.createElement('link');
+    theme.rel = 'stylesheet';
+    theme.href = `${new URL('.', document.baseURI)}assets/css/theme.css`;
+    document.head.appendChild(theme);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.faq-question').forEach(question => {
         const item = question.closest('.faq-item');
