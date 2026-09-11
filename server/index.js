@@ -7,15 +7,34 @@ import pg from 'pg';
 const { Pool } = pg;
 const app = express();
 const port = Number(process.env.PORT || 3000);
-const publicOrigin = process.env.PUBLIC_ORIGIN || '';
+const nodeEnv = process.env.NODE_ENV || 'development';
+const publicOriginInput = process.env.PUBLIC_ORIGIN || '';
 const hmacSecret = process.env.LICENSE_HMAC_SECRET;
-const trustProxy = process.env.TRUST_PROXY === 'true';
+const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
 
 if (!hmacSecret || hmacSecret.length < 32) {
     throw new Error('LICENSE_HMAC_SECRET must be set to a random value of at least 32 characters.');
 }
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL must be configured.');
+}
+if (!Number.isInteger(trustProxyHops) || trustProxyHops < 0 || trustProxyHops > 5) {
+    throw new Error('TRUST_PROXY_HOPS must be an integer from 0 to 5.');
+}
+
+let publicOrigin = '';
+if (nodeEnv === 'production' && !publicOriginInput) {
+    throw new Error('PUBLIC_ORIGIN must be configured in production.');
+}
+if (publicOriginInput) {
+    try {
+        const parsedOrigin = new URL(publicOriginInput);
+        if (!['http:', 'https:'].includes(parsedOrigin.protocol)) throw new Error('unsupported protocol');
+        if (parsedOrigin.pathname !== '/' || parsedOrigin.search || parsedOrigin.hash) throw new Error('origin must not include a path, query, or hash');
+        publicOrigin = parsedOrigin.origin;
+    } catch {
+        throw new Error('PUBLIC_ORIGIN must be a valid origin like https://example.com.');
+    }
 }
 
 let allowedWorkinkLinks;
@@ -25,11 +44,11 @@ try {
     throw new Error('WORKINK_LINK_IDS must be valid JSON, for example {"external":12345}.');
 }
 
-if (!allowedWorkinkLinks || typeof allowedWorkinkLinks !== 'object') {
+if (!allowedWorkinkLinks || typeof allowedWorkinkLinks !== 'object' || Array.isArray(allowedWorkinkLinks)) {
     throw new Error('WORKINK_LINK_IDS must be a JSON object mapping products to Work.ink link IDs.');
 }
 
-const databaseSslEnabled = process.env.NODE_ENV === 'production';
+const databaseSslEnabled = nodeEnv === 'production';
 const databaseSslRejectUnauthorized = process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false';
 const databaseSsl = databaseSslEnabled
     ? {
@@ -40,18 +59,30 @@ const databaseSsl = databaseSslEnabled
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: databaseSsl
+    ssl: databaseSsl,
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
 });
 
 app.disable('x-powered-by');
-app.set('trust proxy', trustProxy);
+app.set('trust proxy', trustProxyHops);
 app.use(helmet({
     contentSecurityPolicy: false,
     referrerPolicy: { policy: 'no-referrer' },
     crossOriginResourcePolicy: { policy: 'same-origin' },
     permittedCrossDomainPolicies: { permittedPolicies: 'none' }
 }));
-app.use(express.json({ limit: '16kb' }));
+app.use(express.json({ limit: '16kb', strict: true }));
+
+function noStore(_req, res, next) {
+    res.setHeader('Cache-Control', 'no-store, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    next();
+}
+
+app.use('/api', noStore);
+app.use('/health', noStore);
 
 if (publicOrigin) {
     app.use((req, res, next) => {
@@ -59,12 +90,9 @@ if (publicOrigin) {
         if (origin && origin !== publicOrigin) {
             return res.status(403).json({ success: false, error: 'Origin not allowed.' });
         }
-        if (origin) {
-            res.setHeader('Access-Control-Allow-Origin', publicOrigin);
-            res.setHeader('Access-Control-Allow-Credentials', 'true');
-        }
+        if (origin) res.setHeader('Access-Control-Allow-Origin', publicOrigin);
         res.setHeader('Vary', 'Origin');
-        res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         if (req.method === 'OPTIONS') return res.sendStatus(204);
         next();
@@ -87,12 +115,28 @@ const validateLimiter = rateLimit({
     message: { success: false, error: 'Too many validation attempts. Try again later.' }
 });
 
+const checkoutLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    limit: 10,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many checkout attempts. Try again later.' }
+});
+
+const healthLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 30,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { ok: false, error: 'Too many health checks. Try again later.' }
+});
+
 function digest(value) {
     return crypto.createHmac('sha256', hmacSecret).update(value).digest('hex');
 }
 
 function generateLicenseKey() {
-    return `NC-${crypto.randomBytes(24).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}`;
+    return `NC-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toString().toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}`;
 }
 
 function cleanProductId(value) {
@@ -124,7 +168,13 @@ async function verifyWorkinkToken(token, productId) {
 
     if (!response.ok) return { valid: false, reason: 'verification_unavailable' };
 
-    const data = await response.json();
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        return { valid: false, reason: 'verification_unavailable' };
+    }
+
     if (data?.valid !== true) return { valid: false, reason: 'invalid_or_expired' };
     if (Number(data.info?.linkId) !== expectedLink) return { valid: false, reason: 'wrong_link' };
 
@@ -136,12 +186,12 @@ async function verifyWorkinkToken(token, productId) {
     return { valid: true, info: data.info || {} };
 }
 
-app.get('/health', async (_req, res) => {
+app.get('/health', healthLimiter, async (_req, res) => {
     try {
         await pool.query('SELECT 1');
-        res.json({ ok: true });
+        return res.json({ ok: true });
     } catch {
-        res.status(503).json({ ok: false });
+        return res.status(503).json({ ok: false });
     }
 });
 
@@ -168,8 +218,6 @@ app.post('/api/keys/claim', claimLimiter, async (req, res) => {
             return res.status(status).json({ success: false, error: 'Verification failed.' });
         }
 
-        // Reserve the verified token before issuing anything. The primary key makes
-        // concurrent requests for the same Work.ink token mutually exclusive.
         const reservation = await pool.query(
             `INSERT INTO claim_locks (token_hash, product_id, status)
              VALUES ($1, $2, 'pending')
@@ -196,26 +244,35 @@ app.post('/api/keys/claim', claimLimiter, async (req, res) => {
                 [keyHash, productId, expiresAt, tokenHash, linkId]
             );
 
-            await pool.query(
+            const lockUpdate = await pool.query(
                 `UPDATE claim_locks
                  SET status = 'issued', issued_at = NOW(), license_id = $2
-                 WHERE token_hash = $1`,
+                 WHERE token_hash = $1 AND status = 'pending'`,
                 [tokenHash, result.rows[0].id]
             );
+
+            if (lockUpdate.rowCount !== 1) {
+                throw new Error('Unable to finalize claim reservation.');
+            }
         } catch (error) {
             await pool.query('DELETE FROM claim_locks WHERE token_hash = $1 AND status = \'pending\'', [tokenHash]);
             throw error;
         }
 
-        // Work.ink documents ?deleteToken=1 as the single-use option. Even if this
-        // follow-up call fails, our local reservation prevents a second license issue.
         try {
-            await fetch(
+            const consumeResponse = await fetch(
                 `https://work.ink/_api/v2/token/isValid/${encodeURIComponent(token)}?deleteToken=1`,
-                { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000), cache: 'no-store' }
+                {
+                    headers: { Accept: 'application/json' },
+                    signal: AbortSignal.timeout(8000),
+                    cache: 'no-store'
+                }
             );
+            if (!consumeResponse.ok) {
+                console.warn(`Work.ink token consumption failed with HTTP ${consumeResponse.status}.`);
+            }
         } catch {
-            // The token remains unusable by this backend because it is already reserved.
+            console.warn('Work.ink token consumption request failed. Local claim reservation remains authoritative.');
         }
 
         return res.json({ success: true, key: licenseKey, expiresAt: expiresAt.toISOString() });
@@ -258,6 +315,18 @@ app.post('/api/license/validate', validateLimiter, async (req, res) => {
     } catch {
         return res.status(500).json({ success: false, error: 'Unable to validate license.' });
     }
+});
+
+app.post('/api/store/checkout', checkoutLimiter, async (req, res) => {
+    const productId = cleanProductId(req.body?.productId);
+    if (!productId || !expectedLinkId(productId)) {
+        return res.status(400).json({ success: false, error: 'Invalid product.' });
+    }
+
+    return res.status(503).json({
+        success: false,
+        error: 'Checkout is not configured on the backend.'
+    });
 });
 
 app.use((_req, res) => res.status(404).json({ success: false, error: 'Not found.' }));
