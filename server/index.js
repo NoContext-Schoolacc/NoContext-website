@@ -1,10 +1,12 @@
 import crypto from 'node:crypto';
+import { promisify } from 'node:util';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import pg from 'pg';
 
 const { Pool } = pg;
+const scrypt = promisify(crypto.scrypt);
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const nodeEnv = process.env.NODE_ENV || 'development';
@@ -12,6 +14,8 @@ const publicOriginInput = process.env.PUBLIC_ORIGIN || '';
 const hmacSecret = process.env.LICENSE_HMAC_SECRET;
 const adminApiKey = process.env.ADMIN_API_KEY;
 const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
+const SESSION_COOKIE = nodeEnv === 'production' ? '__Host-nc_session' : 'nc_session';
+const SESSION_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 if (!hmacSecret || hmacSecret.length < 32) {
     throw new Error('LICENSE_HMAC_SECRET must be set to a random value of at least 32 characters.');
@@ -97,6 +101,7 @@ if (publicOrigin) {
             return res.status(403).json({ success: false, error: 'Origin not allowed.' });
         }
         if (origin) res.setHeader('Access-Control-Allow-Origin', publicOrigin);
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -153,6 +158,14 @@ const telemetryLimiter = rateLimit({
     message: { success: false, error: 'Too many telemetry events.' }
 });
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    message: { success: false, error: 'Too many authentication attempts. Try again later.' }
+});
+
 function digest(value) {
     return crypto.createHmac('sha256', hmacSecret).update(value).digest('hex');
 }
@@ -174,6 +187,129 @@ function requireAdmin(req, res, next) {
 
     res.setHeader('Cache-Control', 'no-store, max-age=0');
     next();
+}
+
+function parseCookies(header) {
+    const cookies = {};
+    if (typeof header !== 'string') return cookies;
+
+    for (const part of header.split(';')) {
+        const index = part.indexOf('=');
+        if (index < 0) continue;
+        const name = part.slice(0, index).trim();
+        const value = part.slice(index + 1).trim();
+        if (name) cookies[name] = value;
+    }
+
+    return cookies;
+}
+
+function setSessionCookie(res, token) {
+    const secure = nodeEnv === 'production' ? '; Secure' : '';
+    res.setHeader(
+        'Set-Cookie',
+        `${SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL_SECONDS}${secure}`
+    );
+}
+
+function clearSessionCookie(res) {
+    const secure = nodeEnv === 'production' ? '; Secure' : '';
+    res.setHeader(
+        'Set-Cookie',
+        `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure}`
+    );
+}
+
+async function createSession(userId, res) {
+    await pool.query('DELETE FROM sessions WHERE user_id = $1 OR expires_at <= NOW()', [userId]);
+
+    const token = crypto.randomBytes(32).toString('base64url');
+    const tokenHash = digest(token);
+    const expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000);
+
+    await pool.query(
+        `INSERT INTO sessions (user_id, token_hash, expires_at)
+         VALUES ($1, $2, $3)`,
+        [userId, tokenHash, expiresAt]
+    );
+
+    setSessionCookie(res, token);
+    return expiresAt;
+}
+
+async function currentUser(req) {
+    const cookies = parseCookies(req.get('cookie'));
+    const encodedToken = cookies[SESSION_COOKIE];
+    if (!encodedToken) return null;
+
+    let token;
+    try {
+        token = decodeURIComponent(encodedToken);
+    } catch {
+        return null;
+    }
+
+    if (token.length < 32 || token.length > 128) return null;
+
+    const tokenHash = digest(token);
+    const result = await pool.query(
+        `SELECT u.id, u.username
+         FROM sessions s
+         INNER JOIN users u ON u.id = s.user_id
+         WHERE s.token_hash = $1 AND s.expires_at > NOW()
+         LIMIT 1`,
+        [tokenHash]
+    );
+
+    return result.rowCount ? result.rows[0] : null;
+}
+
+async function hashPassword(password) {
+    const salt = crypto.randomBytes(16);
+    const derivedKey = await scrypt(password, salt, 64, {
+        N: 16384,
+        r: 8,
+        p: 1,
+        maxmem: 32 * 1024 * 1024
+    });
+
+    return {
+        salt: salt.toString('base64'),
+        hash: Buffer.from(derivedKey).toString('base64')
+    };
+}
+
+async function verifyPassword(password, saltBase64, storedHashBase64) {
+    let salt;
+    let expected;
+    try {
+        salt = Buffer.from(saltBase64, 'base64');
+        expected = Buffer.from(storedHashBase64, 'base64');
+    } catch {
+        return false;
+    }
+
+    if (salt.length !== 16 || expected.length !== 64) return false;
+
+    const derivedKey = await scrypt(password, salt, 64, {
+        N: 16384,
+        r: 8,
+        p: 1,
+        maxmem: 32 * 1024 * 1024
+    });
+
+    return safeEqual(Buffer.from(derivedKey).toString('base64'), expected.toString('base64'));
+}
+
+function cleanUsername(value) {
+    if (typeof value !== 'string') return null;
+    const username = value.trim();
+    if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) return null;
+    return username;
+}
+
+function cleanPassword(value) {
+    return typeof value === 'string' && value.length >= 10 && value.length <= 128 ? value : null;
 }
 
 function generateLicenseKey() {
@@ -233,6 +369,98 @@ app.get('/health', healthLimiter, async (_req, res) => {
         return res.json({ ok: true });
     } catch {
         return res.status(503).json({ ok: false });
+    }
+});
+
+app.post('/api/auth/register', authLimiter, async (req, res) => {
+    const username = cleanUsername(req.body?.username);
+    const password = cleanPassword(req.body?.password);
+
+    if (!username || !password) {
+        return res.status(400).json({ success: false, error: 'Use a 3-24 character username and a 10-128 character password.' });
+    }
+
+    try {
+        const passwordData = await hashPassword(password);
+        const normalized = username.toLowerCase();
+        const result = await pool.query(
+            `INSERT INTO users (username, username_normalized, password_hash, password_salt)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id, username`,
+            [username, normalized, passwordData.hash, passwordData.salt]
+        );
+
+        const user = result.rows[0];
+        await createSession(user.id, res);
+        return res.status(201).json({ success: true, user: { username: user.username } });
+    } catch (error) {
+        if (error?.code === '23505') {
+            return res.status(409).json({ success: false, error: 'That username is already in use.' });
+        }
+        return res.status(500).json({ success: false, error: 'Unable to create the account.' });
+    }
+});
+
+app.post('/api/auth/login', authLimiter, async (req, res) => {
+    const username = cleanUsername(req.body?.username);
+    const password = typeof req.body?.password === 'string' ? req.body.password : '';
+
+    if (!username || password.length > 128) {
+        return res.status(400).json({ success: false, error: 'Invalid username or password.' });
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT id, username, password_hash, password_salt
+             FROM users
+             WHERE username_normalized = $1
+             LIMIT 1`,
+            [username.toLowerCase()]
+        );
+
+        const user = result.rows[0];
+        const passwordMatches = user
+            ? await verifyPassword(password, user.password_salt, user.password_hash)
+            : false;
+
+        if (!user || !passwordMatches) {
+            return res.status(401).json({ success: false, error: 'Invalid username or password.' });
+        }
+
+        await pool.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
+        await createSession(user.id, res);
+        return res.json({ success: true, user: { username: user.username } });
+    } catch {
+        return res.status(500).json({ success: false, error: 'Unable to sign in right now.' });
+    }
+});
+
+app.post('/api/auth/logout', authLimiter, async (req, res) => {
+    const cookies = parseCookies(req.get('cookie'));
+    const encodedToken = cookies[SESSION_COOKIE];
+
+    try {
+        if (encodedToken) {
+            const token = decodeURIComponent(encodedToken);
+            if (token.length >= 32 && token.length <= 128) {
+                await pool.query('DELETE FROM sessions WHERE token_hash = $1', [digest(token)]);
+            }
+        }
+    } catch {
+        // Always clear the browser cookie even if session cleanup fails.
+    }
+
+    clearSessionCookie(res);
+    return res.json({ success: true });
+});
+
+app.get('/api/auth/me', async (req, res) => {
+    try {
+        const user = await currentUser(req);
+        if (!user) return res.json({ success: true, authenticated: false });
+        return res.json({ success: true, authenticated: true, user: { username: user.username } });
+    } catch {
+        return res.status(500).json({ success: false, error: 'Unable to check the current session.' });
     }
 });
 
