@@ -52,11 +52,15 @@ form?.addEventListener('submit', async (event) => {
 
     const link = document.createElement('a');
     link.href = url.toString();
-    link.textContent = 'Continue to submit it';
+    link.textContent = 'Continue to submit on GitHub →';
+    link.className = 'ticket-success-action';
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
 
-    successBox.textContent = 'Your ticket is ready. ';
-    successBox.append(link);
+    const message = document.createElement('span');
+    message.className = 'ticket-success-message';
+    message.textContent = 'Your ticket is prepared. One final step is required on GitHub.';
+
+    successBox.append(message, link);
     successBox.hidden = false;
 });
