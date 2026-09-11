@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>License | NoContext</title>
+<link rel="stylesheet" href="../assets/css/style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head><body>
+<nav><div class="container"><a href="../" class="logo"><i class="fas fa-cube"></i> NoContext</a><ul class="nav-links"><li><a href="../">Home</a></li><li><a href="../store/">Store</a></li><li><a href="../key/">Free Key</a></li></ul><a href="../store/" class="btn btn-outline">Browse Store</a></div></nav>
+<main class="page-shell"><div class="container narrow-container"><div class="page-kicker">LICENSE / 01</div><h1 class="page-title">License manager</h1><p class="page-lead">Check the current status of your NoContext license.</p>
+<div class="card form-card"><div class="form-card-heading"><div class="form-icon"><i class="fas fa-key"></i></div><div><h2>Verify a license</h2><p>Enter your key below to view its status and expiry.</p></div></div><div class="input-group"><label for="license-key">License key</label><input type="text" id="license-key" placeholder="NC-XXXXXXXX-XXXXXXXX-XXXXXXXX" autocomplete="off"></div><button class="btn btn-primary form-submit" onclick="checkStatus()">Check status <i class="fas fa-arrow-right"></i></button><div id="status-result" class="status-panel" style="display:none"><div><span>Status</span><strong id="status-label">Active</strong></div><div><span>Expires</span><strong id="expiry-label">—</strong></div></div><div id="loading-status" class="loading-spinner" style="display:none"></div></div>
+<div class="store-note"><i class="fas fa-shield-halved"></i><span>License validation is handled by the NoContext server.</span></div></div></main>
+<footer><div class="container"><p>&copy; 2026 NoContext. All rights reserved.</p></div></footer>
+<script src="../assets/js/api.js"></script><script src="../assets/js/main.js"></script><script src="../assets/js/account.js"></script>
+</body></html>
