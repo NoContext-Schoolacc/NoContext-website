@@ -1,0 +1,55 @@
+name: Security checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-security:
+    name: Node dependency audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: server/package.json
+      - name: Install dependencies
+        run: npm install --ignore-scripts
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Check server syntax
+        run: node --check index.js
+
+  frontend-check:
+    name: Frontend policy checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Reject inline event handlers
+        run: |
+          if grep -RInE 'on(click|load|submit|change|input|keydown|keyup)=' --include='*.html' .; then
+            echo 'Inline event handlers found. Keep JavaScript in assets/js for CSP compatibility.'
+            exit 1
+          fi
+      - name: Reject local secret files
+        run: |
+          if find . -type f \( -name '.env' -o -name '*.pem' -o -name '*.key' \) -not -path './.git/*' | grep -q .; then
+            echo 'Potential secret file found in repository.'
+            exit 1
+          fi
