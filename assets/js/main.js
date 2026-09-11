@@ -21,7 +21,7 @@
 
     const palette = document.createElement('link');
     palette.rel = 'stylesheet';
-    palette.href = new URL('palette.css?v=visual3', baseStylesheet.href).href;
+    palette.href = new URL('palette.css?v=visual4', baseStylesheet.href).href;
 
     let themeReady = false;
     let paletteReady = false;
