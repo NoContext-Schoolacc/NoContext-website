@@ -67,6 +67,26 @@ CREATE TABLE IF NOT EXISTS discord_oauth_states (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS tickets (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    category VARCHAR(32) NOT NULL CHECK (category IN ('Account', 'License', 'Website', 'Other')),
+    priority VARCHAR(16) NOT NULL DEFAULT 'Normal' CHECK (priority IN ('Normal', 'High')),
+    subject VARCHAR(120) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'closed')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS ticket_messages (
+    id BIGSERIAL PRIMARY KEY,
+    ticket_id BIGINT NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+    author_type VARCHAR(16) NOT NULL CHECK (author_type IN ('user', 'staff')),
+    user_id BIGINT REFERENCES users(id) ON DELETE SET NULL,
+    body VARCHAR(4000) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
 ALTER TABLE users ALTER COLUMN password_salt DROP NOT NULL;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS discord_id VARCHAR(32);
@@ -84,6 +104,7 @@ CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at);
 CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at);
 CREATE INDEX IF NOT EXISTS discord_oauth_states_expires_at_idx ON discord_oauth_states(expires_at);
 CREATE UNIQUE INDEX IF NOT EXISTS users_discord_id_unique_idx ON users(discord_id) WHERE discord_id IS NOT NULL;
-CREATE UNIQUE INDEX IF NOT EXISTS licenses_workink_token_unique_idx
-    ON licenses(workink_token_hash)
-    WHERE workink_token_hash IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS licenses_workink_token_unique_idx ON licenses(workink_token_hash) WHERE workink_token_hash IS NOT NULL;
+CREATE INDEX IF NOT EXISTS tickets_user_updated_idx ON tickets(user_id, updated_at DESC);
+CREATE INDEX IF NOT EXISTS tickets_status_updated_idx ON tickets(status, updated_at DESC);
+CREATE INDEX IF NOT EXISTS ticket_messages_ticket_created_idx ON ticket_messages(ticket_id, created_at ASC);
