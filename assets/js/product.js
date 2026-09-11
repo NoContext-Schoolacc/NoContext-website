@@ -48,18 +48,17 @@ function renderProduct(product, id) {
     button.textContent = product.buttonText;
 
     if (product.comingSoon) {
-        button.href = '#';
+        button.href = '../product/';
         button.setAttribute('aria-disabled', 'true');
-        button.style.opacity = '0.5';
-        button.style.cursor = 'not-allowed';
+        button.classList.add('btn-disabled');
         badge.textContent = 'COMING SOON';
-        badge.style.background = 'var(--text-muted)';
+        badge.classList.add('badge-muted');
     } else {
         button.removeAttribute('aria-disabled');
-        button.style.opacity = '';
-        button.style.cursor = '';
+        button.classList.remove('btn-disabled');
         button.href = `../key/?product=${encodeURIComponent(id)}`;
         badge.textContent = product.price;
+        badge.classList.remove('badge-muted');
     }
 
     featureContainer.replaceChildren();
@@ -72,10 +71,8 @@ function renderProduct(product, id) {
         const heading = document.createElement('h3');
         heading.textContent = feature.title;
         const desc = document.createElement('p');
+        desc.className = 'feature-desc';
         desc.textContent = feature.desc;
-        desc.style.color = 'var(--text-muted)';
-        desc.style.fontSize = '0.9rem';
-        desc.style.marginTop = '10px';
         item.append(icon, heading, desc);
         featureContainer.appendChild(item);
     });
