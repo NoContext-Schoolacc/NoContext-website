@@ -22,32 +22,76 @@
         </div>
     </nav>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-title">
-                <h2>Product Store</h2>
-                <p>Select your platform to view available software.</p>
+    <main class="store-page">
+        <section class="store-hero">
+            <div class="container store-hero-inner">
+                <div>
+                    <div class="store-eyebrow">SOFTWARE STORE</div>
+                    <h1>Find the right <span>software.</span></h1>
+                    <p>Browse NoContext software by platform and see what is available today.</p>
+                </div>
+                <div class="store-meta">02 CATEGORIES</div>
             </div>
+        </section>
 
-            <div class="store-grid">
-                <!-- Roblox Platform -->
-                <a href="roblox.html" class="card platform-card">
-                    <i class="fas fa-gamepad" style="color: var(--accent);"></i>
-                    <h3>Roblox</h3>
-                    <p>Advanced external tools and executors.</p>
-                    <div class="btn btn-primary mt-4">View Roblox Tools</div>
-                </a>
+        <section class="section store-section">
+            <div class="container">
+                <div class="store-heading">
+                    <div>
+                        <h2>Platforms</h2>
+                        <p>Select a platform to continue.</p>
+                    </div>
+                </div>
 
-                <!-- FiveM Platform -->
-                <div class="card platform-card" style="opacity: 0.7; cursor: default;">
-                    <i class="fas fa-car" style="color: var(--text-muted);"></i>
-                    <h3 style="color: var(--text-muted);">FiveM</h3>
-                    <p>Coming soon to NoContext.</p>
-                    <div class="btn btn-outline mt-4" disabled>Soon</div>
+                <div class="store-grid">
+                    <a href="roblox.html" class="store-card store-card-link">
+                        <div class="store-card-top">
+                            <span class="store-icon">
+                                <i class="fas fa-cubes"></i>
+                            </span>
+                            <span class="store-status store-status-live">Available</span>
+                        </div>
+
+                        <div class="store-card-body">
+                            <span class="store-index">01 / PLATFORM</span>
+                            <h3>Roblox</h3>
+                            <p>View the software currently available for the Roblox platform.</p>
+                        </div>
+
+                        <div class="store-card-footer">
+                            <span>View software</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </a>
+
+                    <div class="store-card store-card-disabled">
+                        <div class="store-card-top">
+                            <span class="store-icon">
+                                <i class="fas fa-car-side"></i>
+                            </span>
+                            <span class="store-status store-status-soon">Coming soon</span>
+                        </div>
+
+                        <div class="store-card-body">
+                            <span class="store-index">02 / PLATFORM</span>
+                            <h3>FiveM</h3>
+                            <p>New NoContext software for FiveM is currently in development.</p>
+                        </div>
+
+                        <div class="store-card-footer">
+                            <span>Coming soon</span>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="store-note">
+                    <i class="fas fa-circle-info"></i>
+                    <span>More platforms and software will be added over time.</span>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
     <script src="assets/js/api.js"></script>
     <script src="assets/js/main.js"></script>
