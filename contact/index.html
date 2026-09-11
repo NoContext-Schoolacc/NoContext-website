@@ -8,8 +8,8 @@
 <meta property="og:title" content="NoContext | Contact">
 <meta property="og:description" content="Contact NoContext support and submit a support ticket.">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="../assets/css/style.css?v=contact7">
-<link rel="stylesheet" href="../assets/css/ticket.css?v=1">
+<link rel="stylesheet" href="../assets/css/style.css?v=contact8">
+<link rel="stylesheet" href="../assets/css/ticket.css?v=3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body class="ticket-page">
@@ -23,8 +23,8 @@
 <div class="card ticket-card"><div class="form-card-heading"><div class="ticket-icon"><i class="fas fa-ticket"></i></div><div><h2>Support ticket</h2><p>Usually takes less than a minute.</p></div></div>
 <form id="contact-ticket-form" class="ticket-form ticket-fields" novalidate>
 <div class="ticket-row"><div class="ticket-field"><label for="ticket-category"><i class="fas fa-layer-group"></i>Category</label><select id="ticket-category"><option>Account</option><option>License</option><option>Website</option><option>Other</option></select></div><div class="ticket-field"><label for="ticket-priority"><i class="fas fa-flag"></i>Priority</label><select id="ticket-priority"><option>Normal</option><option>High</option></select></div></div>
-<div class="ticket-field"><label for="ticket-subject"><i class="fas fa-heading"></i>Subject</label><input id="ticket-subject" maxlength="120" required placeholder="What do you need help with?"></div>
-<div class="ticket-field"><label for="ticket-description"><i class="fas fa-align-left"></i>Description</label><textarea id="ticket-description" maxlength="4000" required placeholder="Explain what happened and include useful steps or error messages."></textarea></div>
+<div class="ticket-field"><label for="ticket-subject"><i class="fas fa-heading"></i>Subject</label><input id="ticket-subject" maxlength="120" required placeholder="What do you need help with?" autocomplete="off"></div>
+<div class="ticket-field"><label for="ticket-description"><i class="fas fa-align-left"></i>Description</label><textarea id="ticket-description" maxlength="4000" rows="8" required placeholder="Explain what happened and include useful steps or error messages."></textarea></div>
 <button class="btn btn-primary ticket-submit" type="submit">Submit ticket <i class="fas fa-arrow-right"></i></button>
 <p id="ticket-error" class="ticket-error" role="alert" hidden></p><div id="ticket-success" class="ticket-success" hidden></div>
 </form></div>
@@ -32,6 +32,6 @@
 </div></section>
 <section class="section"><div class="container"><div class="card"><h2>Need a quick answer?</h2><p>Check the FAQ for common questions before opening a ticket.</p><a class="btn btn-outline" href="../faq/">View FAQ</a></div></div></section>
 <footer><div class="container"><a href="../about/">About</a> · <a href="../updates/">Updates</a> · <a href="../faq/">FAQ</a> · <a href="./">Contact</a> · <a href="../privacy/">Privacy</a> · <a href="../terms/">Terms</a></div></footer>
-<script src="../assets/js/contact-ticket.js?v=2" defer></script>
+<script src="../assets/js/contact-ticket.js?v=3" defer></script>
 </body>
 </html>
