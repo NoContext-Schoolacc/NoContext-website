@@ -14,8 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = url.searchParams.get('token');
     const productParam = url.searchParams.get('product');
 
-    // Remove the verification token from the visible URL immediately so it is not
-    // left in browser history, copied URLs, or later referrer data.
     if (token) {
         url.searchParams.delete('token');
         window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
@@ -52,9 +50,17 @@ function selectProduct(type) {
     const config = PRODUCT_CONFIG[type];
     if (!config) return;
 
-    document.getElementById('product-title').textContent = config.name;
-    document.getElementById('product-name').textContent = config.name;
-    document.getElementById('workink-link').href = config.url;
+    const title = document.getElementById('product-title');
+    const productName = document.getElementById('product-name');
+    const workinkLink = document.getElementById('workink-link');
+
+    if (title) title.textContent = config.name;
+    if (productName) productName.textContent = config.name;
+    if (workinkLink) {
+        workinkLink.href = config.url;
+        workinkLink.referrerPolicy = 'no-referrer';
+        workinkLink.rel = 'noopener noreferrer';
+    }
 
     showState('ready');
 }
