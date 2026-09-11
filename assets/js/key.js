@@ -10,12 +10,24 @@ const PRODUCT_CONFIG = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const productParam = urlParams.get('product');
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get('token');
+    const productParam = url.searchParams.get('product');
+
+    // Remove the verification token from the visible URL immediately so it is not
+    // left in browser history, copied URLs, or later referrer data.
+    if (token) {
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+    }
 
     if (token) {
-        const product = productParam && PRODUCT_CONFIG[productParam] ? productParam : 'external';
+        const product = productParam && PRODUCT_CONFIG[productParam] ? productParam : null;
+        if (!product) {
+            showError('Invalid product selection.');
+            return;
+        }
+
         showState('loading');
 
         try {
