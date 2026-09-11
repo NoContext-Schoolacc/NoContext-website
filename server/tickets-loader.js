@@ -1,0 +1,197 @@
+import crypto from 'node:crypto';
+import express from 'express';
+import pg from 'pg';
+
+const { Pool } = pg;
+const originalListen = express.application.listen;
+let installed = false;
+
+const nodeEnv = process.env.NODE_ENV || 'development';
+const hmacSecret = process.env.LICENSE_HMAC_SECRET;
+const adminApiKey = process.env.ADMIN_API_KEY || '';
+const publicOrigin = process.env.PUBLIC_ORIGIN || '';
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: nodeEnv === 'production' ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false', ...(process.env.DATABASE_CA_CERT ? { ca: process.env.DATABASE_CA_CERT } : {}) } : false,
+    max: 5,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
+});
+
+function digest(value) {
+    return crypto.createHmac('sha256', hmacSecret || '').update(value).digest('hex');
+}
+function parseCookies(header) {
+    const cookies = {};
+    if (typeof header !== 'string') return cookies;
+    for (const part of header.split(';')) {
+        const index = part.indexOf('=');
+        if (index < 0) continue;
+        const name = part.slice(0, index).trim();
+        if (name) cookies[name] = part.slice(index + 1).trim();
+    }
+    return cookies;
+}
+async function getUser(req) {
+    if (!hmacSecret) return null;
+    const cookieName = nodeEnv === 'production' ? '__Host-nc_session' : 'nc_session';
+    const encoded = parseCookies(req.get('cookie'))[cookieName];
+    if (!encoded) return null;
+    let token;
+    try { token = decodeURIComponent(encoded); } catch { return null; }
+    if (token.length < 32 || token.length > 128) return null;
+    const result = await pool.query(`SELECT u.id, u.username FROM sessions s INNER JOIN users u ON u.id = s.user_id WHERE s.token_hash = $1 AND s.expires_at > NOW() LIMIT 1`, [digest(token)]);
+    return result.rowCount ? result.rows[0] : null;
+}
+function sameOrigin(req) {
+    if (nodeEnv !== 'production' || !publicOrigin) return true;
+    const origin = req.get('origin');
+    const referer = req.get('referer');
+    if (origin) return origin === publicOrigin;
+    if (referer) { try { return new URL(referer).origin === publicOrigin; } catch { return false; } }
+    return false;
+}
+function admin(req) {
+    if (!adminApiKey) return false;
+    const match = /^Bearer\s+(.+)$/i.exec(req.get('authorization') || '');
+    return Boolean(match && match[1] === adminApiKey);
+}
+function cleanText(value, max) {
+    return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+function validId(value) { return /^\d+$/.test(String(value)) && Number(value) > 0 && Number.isSafeInteger(Number(value)); }
+
+async function install(app) {
+    if (installed) return;
+    installed = true;
+
+    app.get('/api/tickets', async (req, res) => {
+        try {
+            const user = await getUser(req);
+            if (!user) return res.status(401).json({ success: false, error: 'You must be logged in to view tickets.' });
+            const result = await pool.query(`SELECT t.id, t.category, t.priority, t.subject, t.status, t.created_at, t.updated_at,
+                (SELECT body FROM ticket_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_message,
+                (SELECT author_type FROM ticket_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_author
+                FROM tickets t WHERE t.user_id = $1 ORDER BY t.updated_at DESC`, [user.id]);
+            return res.json({ success: true, tickets: result.rows });
+        } catch { return res.status(500).json({ success: false, error: 'Unable to load your tickets.' }); }
+    });
+
+    app.post('/api/tickets', async (req, res) => {
+        if (!sameOrigin(req)) return res.status(403).json({ success: false, error: 'Request origin not allowed.' });
+        try {
+            const user = await getUser(req);
+            if (!user) return res.status(401).json({ success: false, error: 'You must be logged in to create a ticket.' });
+            const category = cleanText(req.body?.category, 32);
+            const priority = cleanText(req.body?.priority, 16);
+            const subject = cleanText(req.body?.subject, 120);
+            const description = cleanText(req.body?.description, 4000);
+            if (!['Account', 'License', 'Website', 'Other'].includes(category)) return res.status(400).json({ success: false, error: 'Invalid category.' });
+            if (!['Normal', 'High'].includes(priority)) return res.status(400).json({ success: false, error: 'Invalid priority.' });
+            if (subject.length < 3) return res.status(400).json({ success: false, error: 'Subject must be at least 3 characters.' });
+            if (description.length < 10) return res.status(400).json({ success: false, error: 'Description must be at least 10 characters.' });
+
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+                const ticket = await client.query(`INSERT INTO tickets (user_id, category, priority, subject) VALUES ($1, $2, $3, $4) RETURNING id, status, created_at, updated_at`, [user.id, category, priority, subject]);
+                await client.query(`INSERT INTO ticket_messages (ticket_id, author_type, user_id, body) VALUES ($1, 'user', $2, $3)`, [ticket.rows[0].id, user.id, description]);
+                await client.query('COMMIT');
+                return res.status(201).json({ success: true, ticket: ticket.rows[0] });
+            } catch (error) {
+                await client.query('ROLLBACK');
+                throw error;
+            } finally { client.release(); }
+        } catch { return res.status(500).json({ success: false, error: 'Unable to create your ticket.' }); }
+    });
+
+    app.get('/api/tickets/:id', async (req, res) => {
+        if (!validId(req.params.id)) return res.status(400).json({ success: false, error: 'Invalid ticket.' });
+        try {
+            const user = await getUser(req);
+            if (!user) return res.status(401).json({ success: false, error: 'You must be logged in.' });
+            const ticket = await pool.query(`SELECT id, category, priority, subject, status, created_at, updated_at FROM tickets WHERE id = $1 AND user_id = $2 LIMIT 1`, [Number(req.params.id), user.id]);
+            if (!ticket.rowCount) return res.status(404).json({ success: false, error: 'Ticket not found.' });
+            const messages = await pool.query(`SELECT m.id, m.author_type, m.body, m.created_at, u.username FROM ticket_messages m LEFT JOIN users u ON u.id = m.user_id WHERE m.ticket_id = $1 ORDER BY m.created_at ASC`, [ticket.rows[0].id]);
+            return res.json({ success: true, ticket: ticket.rows[0], messages: messages.rows });
+        } catch { return res.status(500).json({ success: false, error: 'Unable to load this ticket.' }); }
+    });
+
+    app.post('/api/tickets/:id/messages', async (req, res) => {
+        if (!sameOrigin(req)) return res.status(403).json({ success: false, error: 'Request origin not allowed.' });
+        if (!validId(req.params.id)) return res.status(400).json({ success: false, error: 'Invalid ticket.' });
+        try {
+            const user = await getUser(req);
+            if (!user) return res.status(401).json({ success: false, error: 'You must be logged in.' });
+            const body = cleanText(req.body?.body, 4000);
+            if (body.length < 1) return res.status(400).json({ success: false, error: 'Message cannot be empty.' });
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+                const ticket = await client.query(`SELECT id, status FROM tickets WHERE id = $1 AND user_id = $2 FOR UPDATE`, [Number(req.params.id), user.id]);
+                if (!ticket.rowCount) { await client.query('ROLLBACK'); return res.status(404).json({ success: false, error: 'Ticket not found.' }); }
+                if (ticket.rows[0].status === 'closed') { await client.query('ROLLBACK'); return res.status(409).json({ success: false, error: 'This ticket is closed.' }); }
+                const message = await client.query(`INSERT INTO ticket_messages (ticket_id, author_type, user_id, body) VALUES ($1, 'user', $2, $3) RETURNING id, author_type, body, created_at`, [ticket.rows[0].id, user.id, body]);
+                await client.query(`UPDATE tickets SET updated_at = NOW() WHERE id = $1`, [ticket.rows[0].id]);
+                await client.query('COMMIT');
+                return res.status(201).json({ success: true, message: { ...message.rows[0], username: user.username } });
+            } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
+        } catch { return res.status(500).json({ success: false, error: 'Unable to send your message.' }); }
+    });
+
+    app.get('/api/admin/tickets', async (req, res) => {
+        if (!admin(req)) return res.status(401).json({ success: false, error: 'Unauthorized.' });
+        try {
+            const result = await pool.query(`SELECT t.id, t.category, t.priority, t.subject, t.status, t.created_at, t.updated_at, u.username,
+                (SELECT body FROM ticket_messages m WHERE m.ticket_id = t.id ORDER BY m.created_at DESC LIMIT 1) AS last_message
+                FROM tickets t INNER JOIN users u ON u.id = t.user_id ORDER BY t.updated_at DESC LIMIT 200`);
+            return res.json({ success: true, tickets: result.rows });
+        } catch { return res.status(500).json({ success: false, error: 'Unable to load support tickets.' }); }
+    });
+
+    app.get('/api/admin/tickets/:id', async (req, res) => {
+        if (!admin(req)) return res.status(401).json({ success: false, error: 'Unauthorized.' });
+        if (!validId(req.params.id)) return res.status(400).json({ success: false, error: 'Invalid ticket.' });
+        try {
+            const ticket = await pool.query(`SELECT t.id, t.category, t.priority, t.subject, t.status, t.created_at, t.updated_at, u.username FROM tickets t INNER JOIN users u ON u.id = t.user_id WHERE t.id = $1 LIMIT 1`, [Number(req.params.id)]);
+            if (!ticket.rowCount) return res.status(404).json({ success: false, error: 'Ticket not found.' });
+            const messages = await pool.query(`SELECT m.id, m.author_type, m.body, m.created_at, u.username FROM ticket_messages m LEFT JOIN users u ON u.id = m.user_id WHERE m.ticket_id = $1 ORDER BY m.created_at ASC`, [ticket.rows[0].id]);
+            return res.json({ success: true, ticket: ticket.rows[0], messages: messages.rows });
+        } catch { return res.status(500).json({ success: false, error: 'Unable to load this ticket.' }); }
+    });
+
+    app.post('/api/admin/tickets/:id/messages', async (req, res) => {
+        if (!admin(req)) return res.status(401).json({ success: false, error: 'Unauthorized.' });
+        if (!validId(req.params.id)) return res.status(400).json({ success: false, error: 'Invalid ticket.' });
+        const body = cleanText(req.body?.body, 4000);
+        if (!body) return res.status(400).json({ success: false, error: 'Message cannot be empty.' });
+        try {
+            const client = await pool.connect();
+            try {
+                await client.query('BEGIN');
+                const ticket = await client.query(`SELECT id, status FROM tickets WHERE id = $1 FOR UPDATE`, [Number(req.params.id)]);
+                if (!ticket.rowCount) { await client.query('ROLLBACK'); return res.status(404).json({ success: false, error: 'Ticket not found.' }); }
+                if (ticket.rows[0].status === 'closed') { await client.query('ROLLBACK'); return res.status(409).json({ success: false, error: 'This ticket is closed.' }); }
+                const message = await client.query(`INSERT INTO ticket_messages (ticket_id, author_type, body) VALUES ($1, 'staff', $2) RETURNING id, author_type, body, created_at`, [ticket.rows[0].id, body]);
+                await client.query(`UPDATE tickets SET updated_at = NOW() WHERE id = $1`, [ticket.rows[0].id]);
+                await client.query('COMMIT');
+                return res.status(201).json({ success: true, message: { ...message.rows[0], username: 'Staff' } });
+            } catch (error) { await client.query('ROLLBACK'); throw error; } finally { client.release(); }
+        } catch { return res.status(500).json({ success: false, error: 'Unable to send the staff reply.' }); }
+    });
+
+    app.post('/api/admin/tickets/:id/close', async (req, res) => {
+        if (!admin(req)) return res.status(401).json({ success: false, error: 'Unauthorized.' });
+        if (!validId(req.params.id)) return res.status(400).json({ success: false, error: 'Invalid ticket.' });
+        try {
+            const result = await pool.query(`UPDATE tickets SET status = 'closed', updated_at = NOW() WHERE id = $1 RETURNING id, status`, [Number(req.params.id)]);
+            if (!result.rowCount) return res.status(404).json({ success: false, error: 'Ticket not found.' });
+            return res.json({ success: true, ticket: result.rows[0] });
+        } catch { return res.status(500).json({ success: false, error: 'Unable to close ticket.' }); }
+    });
+}
+
+express.application.listen = function (...args) {
+    void install(this).catch(error => console.error('Support ticket routes failed to install:', error));
+    return originalListen.apply(this, args);
+};
