@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+<title>NoContext | Support Tickets</title>
+<meta name="description" content="Open a NoContext support ticket and get help with your account or website questions.">
+<link rel="stylesheet" href="../assets/css/style.css?v=tickets1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmask7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body>
+<nav aria-label="Primary navigation"><div class="container">
+<a href="../" class="logo" aria-label="NoContext home">◆ NoContext</a>
+<ul class="nav-links"><li><a href="../">Home</a></li><li><a href="../#features">Features</a></li><li><a href="../store/">Store</a></li><li><a href="../about/">About</a></li><li><a href="../updates/">Updates</a></li><li><a href="../faq/">FAQ</a></li><li><a href="../contact/">Contact</a></li></ul>
+<a href="../key/" class="btn btn-primary">Get Started</a>
+</div></nav>
+<header class="hero"><div class="container"><span class="home-kicker">SUPPORT</span><h1>Open a<br><span>ticket.</span></h1><p>Tell us what you need help with. Your ticket will open in the NoContext support tracker.</p></div></header>
+<main class="section"><div class="container narrow-container">
+<form id="ticket-form" class="card form-card" novalidate>
+<div class="form-card-heading"><div class="form-icon"><i class="fas fa-ticket"></i></div><div><h2>New support ticket</h2><p>Give us enough information to understand and reproduce the issue.</p></div></div>
+<div class="input-group"><label for="ticket-category">Category</label><select id="ticket-category" required><option value="Account">Account</option><option value="License">License</option><option value="Website">Website</option><option value="Other">Other</option></select></div>
+<div class="input-group"><label for="ticket-priority">Priority</label><select id="ticket-priority" required><option value="Normal">Normal</option><option value="High">High</option></select></div>
+<div class="input-group"><label for="ticket-subject">Subject</label><input id="ticket-subject" maxlength="120" required placeholder="Briefly describe the issue" autocomplete="off"></div>
+<div class="input-group"><label for="ticket-description">Description</label><textarea id="ticket-description" maxlength="4000" rows="8" required placeholder="What happened? Include relevant steps and error messages, but never include passwords or private credentials."></textarea></div>
+<button class="btn btn-primary form-submit" type="submit">Continue to support <i class="fas fa-arrow-right"></i></button>
+<p id="ticket-error" class="small-muted" role="alert" hidden></p>
+</form>
+<div class="demo-note"><i class="fas fa-circle-info"></i><span>Tickets are tracked as support issues. Do not include passwords, API keys, or other secrets.</span></div>
+</div></main>
+<footer><div class="container"><p>&copy; 2026 NoContext. All rights reserved. · <a href="../privacy/">Privacy</a> · <a href="../terms/">Terms</a></p></div></footer>
+<script src="../assets/js/tickets.js" defer></script>
+</body>
+</html>
