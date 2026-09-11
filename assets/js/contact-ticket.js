@@ -7,11 +7,16 @@ form?.addEventListener('submit', async (event) => {
     errorBox.hidden = true;
     successBox.hidden = true;
 
-    const category = document.getElementById('ticket-category').value;
-    const priority = document.getElementById('ticket-priority').value;
-    const subject = document.getElementById('ticket-subject').value.trim();
-    const description = document.getElementById('ticket-description').value.trim();
+    const category = document.getElementById('ticket-category')?.value;
+    const priority = document.getElementById('ticket-priority')?.value;
+    const subject = document.getElementById('ticket-subject')?.value.trim() || '';
+    const description = document.getElementById('ticket-description')?.value.trim() || '';
 
+    if (!category || !priority) {
+        errorBox.textContent = 'Please choose a category and priority.';
+        errorBox.hidden = false;
+        return;
+    }
     if (subject.length < 3) {
         errorBox.textContent = 'Please enter a subject of at least 3 characters.';
         errorBox.hidden = false;
@@ -26,8 +31,10 @@ form?.addEventListener('submit', async (event) => {
     let username = 'Guest';
     try {
         const response = await fetch('../api/auth/me', { credentials: 'include', cache: 'no-store' });
-        const data = await response.json();
-        if (data?.authenticated && data?.user?.username) username = data.user.username;
+        if (response.ok) {
+            const data = await response.json();
+            if (data?.authenticated && data?.user?.username) username = data.user.username;
+        }
     } catch {}
 
     const body = [
@@ -43,6 +50,13 @@ form?.addEventListener('submit', async (event) => {
     url.searchParams.set('title', `[${category}] ${subject}`.slice(0, 180));
     url.searchParams.set('body', body);
 
-    successBox.innerHTML = 'Your ticket is ready. <a href="' + url.toString() + '">Continue to submit it</a> in the support tracker.';
+    const link = document.createElement('a');
+    link.href = url.toString();
+    link.textContent = 'Continue to submit it';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+
+    successBox.textContent = 'Your ticket is ready. ';
+    successBox.append(link);
     successBox.hidden = false;
 });
