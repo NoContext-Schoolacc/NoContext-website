@@ -1,43 +1,53 @@
-// Shared UI Logic
-
 document.addEventListener('DOMContentLoaded', () => {
-    // FAQ Accordion
-    const faqQuestions = document.querySelectorAll('.faq-question');
-    faqQuestions.forEach(q => {
-        q.addEventListener('click', () => {
-            const answer = q.nextElementSibling;
-            if (!answer) return;
+    document.querySelectorAll('.faq-question').forEach(question => {
+        const item = question.closest('.faq-item');
+        if (!item) return;
 
-            const isOpen = answer.style.display === 'block';
-            document.querySelectorAll('.faq-answer').forEach(a => {
-                a.style.display = 'none';
-            });
+        const toggle = () => {
+            const isOpen = item.classList.toggle('open');
+            question.setAttribute('aria-expanded', String(isOpen));
+        };
 
-            answer.style.display = isOpen ? 'none' : 'block';
+        question.addEventListener('click', toggle);
+        question.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggle();
+            }
         });
     });
 
-    // Smooth Scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const selector = this.getAttribute('href');
+        anchor.addEventListener('click', event => {
+            const selector = anchor.getAttribute('href');
             if (!selector || selector === '#') return;
 
             const target = document.querySelector(selector);
             if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth' });
+                event.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
 });
 
-// Helper for copying text to clipboard
 async function copyToClipboard(text, btnElement) {
-    if (typeof text !== 'string' || !btnElement || !navigator.clipboard) return;
+    if (typeof text !== 'string' || !btnElement) return;
 
     try {
-        await navigator.clipboard.writeText(text);
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.className = 'clipboard-fallback';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            textarea.remove();
+        }
+
         const originalText = btnElement.textContent;
         btnElement.textContent = 'Copied!';
         setTimeout(() => {
