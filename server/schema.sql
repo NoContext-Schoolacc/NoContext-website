@@ -38,12 +38,32 @@ CREATE TABLE IF NOT EXISTS client_errors (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    username VARCHAR(24) NOT NULL,
+    username_normalized VARCHAR(24) NOT NULL UNIQUE,
+    password_hash VARCHAR(128) NOT NULL,
+    password_salt VARCHAR(64) NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS licenses_status_idx ON licenses(status);
 CREATE INDEX IF NOT EXISTS licenses_expires_at_idx ON licenses(expires_at);
 CREATE INDEX IF NOT EXISTS claim_attempts_token_idx ON claim_attempts(token_hash);
 CREATE INDEX IF NOT EXISTS claim_attempts_created_at_idx ON claim_attempts(created_at);
 CREATE INDEX IF NOT EXISTS claim_locks_created_at_idx ON claim_locks(created_at);
 CREATE INDEX IF NOT EXISTS client_errors_created_at_idx ON client_errors(created_at);
+CREATE INDEX IF NOT EXISTS sessions_expires_at_idx ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS users_created_at_idx ON users(created_at);
 CREATE UNIQUE INDEX IF NOT EXISTS licenses_workink_token_unique_idx
     ON licenses(workink_token_hash)
     WHERE workink_token_hash IS NOT NULL;
