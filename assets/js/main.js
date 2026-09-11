@@ -1,12 +1,27 @@
-// Load the shared visual theme from the existing style.css location so every page gets the same design.
+// Load the shared visual theme before revealing the page so the old purple base stylesheet never flashes first.
 (() => {
     const baseStylesheet = document.querySelector('link[href*="assets/css/style.css"]');
     if (!baseStylesheet) return;
 
+    const guard = document.createElement('style');
+    guard.id = 'nc-theme-guard';
+    guard.textContent = 'html.nc-theme-pending body{visibility:hidden}';
+    document.head.appendChild(guard);
+    document.documentElement.classList.add('nc-theme-pending');
+
     const theme = document.createElement('link');
     theme.rel = 'stylesheet';
-    theme.href = new URL('theme.css', baseStylesheet.href).href;
+    theme.href = new URL('theme.css?v=ui3', baseStylesheet.href).href;
+
+    const reveal = () => {
+        document.documentElement.classList.remove('nc-theme-pending');
+        guard.remove();
+    };
+
+    theme.addEventListener('load', reveal, { once: true });
+    theme.addEventListener('error', reveal, { once: true });
     document.head.appendChild(theme);
+    window.setTimeout(reveal, 1800);
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
