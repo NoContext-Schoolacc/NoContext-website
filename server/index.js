@@ -30,7 +30,9 @@ if (publicOriginInput) {
     try {
         const parsedOrigin = new URL(publicOriginInput);
         if (!['http:', 'https:'].includes(parsedOrigin.protocol)) throw new Error('unsupported protocol');
-        if (parsedOrigin.pathname !== '/' || parsedOrigin.search || parsedOrigin.hash) throw new Error('origin must not include a path, query, or hash');
+        if (!['', '/'].includes(parsedOrigin.pathname) || parsedOrigin.search || parsedOrigin.hash) {
+            throw new Error('origin must not include a path, query, or hash');
+        }
         publicOrigin = parsedOrigin.origin;
     } catch {
         throw new Error('PUBLIC_ORIGIN must be a valid origin like https://example.com.');
@@ -136,7 +138,7 @@ function digest(value) {
 }
 
 function generateLicenseKey() {
-    return `NC-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toString().toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}`;
+    return `NC-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}-${crypto.randomBytes(8).toString('base64url').toUpperCase().slice(0, 8)}`;
 }
 
 function cleanProductId(value) {
