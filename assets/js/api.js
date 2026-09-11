@@ -1,80 +1,78 @@
 /**
- * API Service Placeholder
+ * Frontend API service.
  *
- * Replace the BASE_URL and endpoints with your actual backend logic.
- * Do NOT put secret keys or sensitive data here.
+ * Security note: secrets, license databases, key generation, payment
+ * creation, and verification must live on a trusted backend.
+ * This frontend intentionally contains no secret credentials or demo keys.
  */
 
-const API_CONFIG = {
-    BASE_URL: 'https://api.yourdomain.com', // Replace with your actual backend URL
-    ENDPOINTS: {
+const API_CONFIG = Object.freeze({
+    BASE_URL: '',
+    ENDPOINTS: Object.freeze({
         CLAIM_KEY: '/api/keys/claim',
         VALIDATE_LICENSE: '/api/license/validate',
-        CREATE_STRIPE_SESSION: '/api/store/checkout',
-        CRYPTO_PAYMENT: '/api/store/crypto'
+        CREATE_STRIPE_SESSION: '/api/store/checkout'
+    })
+});
+
+function apiUrl(endpoint) {
+    if (!endpoint.startsWith('/')) {
+        throw new Error('Invalid API endpoint.');
     }
-};
+    return `${API_CONFIG.BASE_URL}${endpoint}`;
+}
+
+async function request(endpoint, options = {}) {
+    const response = await fetch(apiUrl(endpoint), {
+        ...options,
+        credentials: 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+            ...(options.headers || {})
+        },
+        cache: 'no-store',
+        redirect: 'error'
+    });
+
+    if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}.`);
+    }
+
+    return response.json();
+}
 
 const ApiService = {
-    /**
-     * Sends the Work.ink claim token to the backend to get a key
-     */
     async claimFreeKey(token) {
-        console.log('API call: Claiming key with token:', token);
-
-        // Simulation: Wait for 1.5s
-        await new Promise(r => setTimeout(r, 1500));
-
-        // DEMO STATE: Returning a mock response
-        // In production, use: return fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CLAIM_KEY}`, { ... });
-
-        if (token === 'demo-success') {
-            return {
-                success: true,
-                key: 'FREE-ABCD-1234-XYZ9'
-            };
+        if (typeof token !== 'string' || token.length < 1 || token.length > 2048) {
+            throw new Error('Invalid or expired verification token.');
         }
 
-        throw new Error('Invalid or expired token. Please complete the Work.ink task again.');
+        return request(API_CONFIG.ENDPOINTS.CLAIM_KEY, {
+            method: 'POST',
+            body: JSON.stringify({ token })
+        });
     },
 
-    /**
-     * Checks the status of a license key
-     */
     async checkLicenseStatus(key) {
-        console.log('API call: Checking license status:', key);
-
-        await new Promise(r => setTimeout(r, 1000));
-
-        // DEMO STATE
-        const demoKeys = {
-            'VALID-KEY': { status: 'Active', expiry: '2026-12-31' },
-            'EXPIRED-KEY': { status: 'Expired', expiry: '2023-01-01' },
-            'REVOKED-KEY': { status: 'Revoked', expiry: 'N/A' }
-        };
-
-        if (demoKeys[key]) {
-            return { success: true, ...demoKeys[key] };
+        if (typeof key !== 'string' || key.length < 1 || key.length > 256) {
+            return { success: false, status: 'Invalid' };
         }
 
-        return { success: false, status: 'Invalid' };
+        return request(API_CONFIG.ENDPOINTS.VALIDATE_LICENSE, {
+            method: 'POST',
+            body: JSON.stringify({ key })
+        });
     },
 
-    /**
-     * Creates a Stripe Checkout Session via backend
-     */
     async createCheckoutSession(productId) {
-        console.log('API call: Creating checkout session for:', productId);
+        if (typeof productId !== 'string' || !/^[a-z0-9_-]{1,64}$/i.test(productId)) {
+            throw new Error('Invalid product.');
+        }
 
-        // This MUST be handled by your backend to keep Stripe Secret Keys safe.
-        // Your backend will return a URL to redirect the user to.
-
-        await new Promise(r => setTimeout(r, 800));
-
-        // Mocking a redirect to Stripe (or success page for demo)
-        return {
-            success: true,
-            url: 'https://checkout.stripe.com/demo' // Replace with your backend's Stripe URL
-        };
+        return request(API_CONFIG.ENDPOINTS.CREATE_STRIPE_SESSION, {
+            method: 'POST',
+            body: JSON.stringify({ productId })
+        });
     }
 };
