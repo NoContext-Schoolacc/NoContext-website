@@ -1,0 +1,38 @@
+name: Support ticket
+description: Report an account, license, website, or other support issue.
+title: "[Support] "
+labels:
+  - support
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not include passwords, API keys, session tokens, or other secrets.
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Account
+        - License
+        - Website
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Normal
+        - High
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain what happened and include useful steps to reproduce it.
+      placeholder: Tell us what happened...
+    validations:
+      required: true
