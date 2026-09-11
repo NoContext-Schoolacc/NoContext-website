@@ -16,9 +16,7 @@ const API_CONFIG = Object.freeze({
 });
 
 function apiUrl(endpoint) {
-    if (!endpoint.startsWith('/')) {
-        throw new Error('Invalid API endpoint.');
-    }
+    if (!endpoint.startsWith('/')) throw new Error('Invalid API endpoint.');
     return `${API_CONFIG.BASE_URL}${endpoint}`;
 }
 
@@ -35,22 +33,22 @@ async function request(endpoint, options = {}) {
         redirect: 'error'
     });
 
-    if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}.`);
-    }
-
+    if (!response.ok) throw new Error(`Request failed with status ${response.status}.`);
     return response.json();
 }
 
 const ApiService = {
-    async claimFreeKey(token) {
-        if (typeof token !== 'string' || token.length < 1 || token.length > 2048) {
+    async claimFreeKey(token, productId) {
+        if (typeof token !== 'string' || token.length < 1 || token.length > 512) {
             throw new Error('Invalid or expired verification token.');
+        }
+        if (typeof productId !== 'string' || !/^[a-z0-9_-]{1,64}$/i.test(productId)) {
+            throw new Error('Invalid product.');
         }
 
         return request(API_CONFIG.ENDPOINTS.CLAIM_KEY, {
             method: 'POST',
-            body: JSON.stringify({ token })
+            body: JSON.stringify({ token, productId })
         });
     },
 
