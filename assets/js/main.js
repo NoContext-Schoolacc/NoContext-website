@@ -6,10 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
     faqQuestions.forEach(q => {
         q.addEventListener('click', () => {
             const answer = q.nextElementSibling;
-            const isOpen = answer.style.display === 'block';
+            if (!answer) return;
 
-            // Close all other answers
-            document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+            const isOpen = answer.style.display === 'block';
+            document.querySelectorAll('.faq-answer').forEach(a => {
+                a.style.display = 'none';
+            });
 
             answer.style.display = isOpen ? 'none' : 'block';
         });
@@ -18,24 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Smooth Scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const selector = this.getAttribute('href');
+            if (!selector || selector === '#') return;
+
+            const target = document.querySelector(selector);
             if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth'
-                });
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
             }
         });
     });
 });
 
 // Helper for copying text to clipboard
-function copyToClipboard(text, btnElement) {
-    navigator.clipboard.writeText(text).then(() => {
-        const originalText = btnElement.innerText;
-        btnElement.innerText = 'Copied!';
+async function copyToClipboard(text, btnElement) {
+    if (typeof text !== 'string' || !btnElement || !navigator.clipboard) return;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        const originalText = btnElement.textContent;
+        btnElement.textContent = 'Copied!';
         setTimeout(() => {
-            btnElement.innerText = originalText;
+            btnElement.textContent = originalText;
         }, 2000);
-    });
+    } catch {
+        // Do not expose clipboard errors or sensitive text in console logs.
+    }
 }
