@@ -1,38 +1,43 @@
-/* NoContext visual refresh — graphite / indigo palette inspired by modern productivity software. */
-:root{
-  --accent:#8b7cf6;
-  --accent-hover:#a99cff;
-  --accent-soft:rgba(139,124,246,.11);
-  --accent-line:rgba(139,124,246,.28);
-  --text-main:#f4f4f5;
-  --text-muted:#9a9ca6;
-  --border:rgba(255,255,255,.085);
-  --border-strong:rgba(255,255,255,.16);
-}
-body{background:#090a0d!important;color:#f4f4f5!important}
+/* NoContext visual refresh v3 — graphite / indigo foundation. */
+:root{--accent:#8b7cf6;--accent-hover:#a99cff;--accent-soft:rgba(139,124,246,.11);--accent-line:rgba(139,124,246,.28);--bg-dark:#090a0d;--bg-card:#11141a;--bg-card-2:#151922;--text-main:#f4f4f5;--text-muted:#9a9ca6;--border:rgba(255,255,255,.085);--border-strong:rgba(255,255,255,.16);--shadow:0 24px 70px rgba(0,0,0,.34)}
+*{scrollbar-color:rgba(139,124,246,.42) #090a0d;scrollbar-width:thin}
+body{background:#090a0d!important;color:var(--text-main)!important}
 body:before{background:radial-gradient(circle at 12% 0%,rgba(139,124,246,.09),transparent 27%),radial-gradient(circle at 88% 12%,rgba(91,145,255,.055),transparent 28%),radial-gradient(circle at 52% 100%,rgba(139,124,246,.035),transparent 35%),linear-gradient(180deg,#0d0e12 0%,#090a0d 52%,#0b0c10 100%)!important}
 body:after{background-image:radial-gradient(circle,rgba(169,156,255,.30) 0 1px,transparent 1.7px),radial-gradient(circle,rgba(255,255,255,.16) 0 1px,transparent 1.8px)!important}
 nav{background:rgba(9,10,13,.76)!important;border-bottom-color:rgba(255,255,255,.07)!important}
 .nav-links a:hover,.nav-links a[aria-current="page"]{background:rgba(255,255,255,.06)!important;color:#fff!important}
 .logo i,.page-kicker,.store-eyebrow,.store-index,.update-version,.admin-stat strong,.auth-footer a,.feature-item-detailed i,.faq-question i{color:var(--accent-hover)!important}
-.home-kicker:before{background:var(--accent)!important}
 h1,h2,h3{color:#f5f5f6!important}
 .hero:before,.store-hero:before{background:radial-gradient(circle,rgba(139,124,246,.14),rgba(139,124,246,.025) 38%,transparent 70%)!important}
 .hero:after,.store-hero:after{border-color:rgba(139,124,246,.11)!important;box-shadow:0 0 110px rgba(139,124,246,.045)!important}
 .btn-primary{background:linear-gradient(135deg,#8b7cf6,#6656d9)!important;border-color:#8b7cf6!important;color:#fff!important;box-shadow:0 12px 32px rgba(139,124,246,.18)!important}
 .btn-primary:hover{background:linear-gradient(135deg,#a99cff,#7666e9)!important;border-color:#a99cff!important;box-shadow:0 18px 42px rgba(139,124,246,.27)!important}
 .btn:after{background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.17) 50%,transparent 75%)!important}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline-color:var(--accent)!important}
 .card:hover,.store-card-link:hover,.feature-card-modern:hover,.update-card:hover{border-color:rgba(139,124,246,.28)!important;box-shadow:0 30px 80px rgba(0,0,0,.46),0 0 30px rgba(139,124,246,.06)!important}
+.feature-card-modern:after{border-color:rgba(139,124,246,.08)!important}
 input:focus,select:focus,textarea:focus{border-color:rgba(139,124,246,.62)!important;box-shadow:0 0 0 4px rgba(139,124,246,.09)!important}
 .form-icon,.store-icon,.ticket-success-action,.auth-tabs{border-color:var(--accent-line)!important;background:var(--accent-soft)!important}
 .form-icon,.store-icon,.ticket-icon{color:#a99cff!important}
 .loading-spinner{border-top-color:var(--accent)!important}
 .store-card-footer i,.visual-center i{color:var(--accent)!important}
 .visual-center i{filter:drop-shadow(0 0 30px rgba(139,124,246,.28))!important}
+.product-visual{background:linear-gradient(145deg,#0a0d12,#11151c)!important}
+.feature-item-detailed{background:rgba(14,18,24,.72)!important;border-color:var(--border)!important}
+.faq-list,.faq-item{border-color:var(--border)!important}
 .update-entry{border-left-color:rgba(139,124,246,.25)!important}.update-entry:before{background:var(--accent)!important;box-shadow:0 0 0 5px rgba(139,124,246,.08)!important}
-.update-filter:hover,.update-filter.active{background:var(--accent-soft)!important;border-color:var(--accent-line)!important}
+.update-filter:hover,.update-filter.active{background:var(--accent-soft)!important;border-color:var(--accent-line)!important;color:#fff!important}
 .account-ticket-item:hover{border-color:var(--accent-line)!important}.account-ticket-icon{background:var(--accent-soft)!important;color:#a99cff!important}
 .ticket-card:before{background:linear-gradient(90deg,var(--accent),rgba(139,124,246,.12),transparent)!important}.ticket-card:after{background:rgba(139,124,246,.055)!important}.ticket-icon{border-color:var(--accent-line)!important;background:linear-gradient(145deg,rgba(139,124,246,.14),rgba(139,124,246,.035))!important}.ticket-field label i,.ticket-info-list i{color:#a99cff!important}.ticket-field input:focus,.ticket-field select:focus,.ticket-field textarea:focus{border-color:#8b7cf6!important;box-shadow:0 0 0 4px rgba(139,124,246,.09),0 12px 30px rgba(0,0,0,.18)!important}.ticket-submit{box-shadow:0 12px 32px rgba(139,124,246,.16)!important}.ticket-success-action{color:#a99cff!important}
 .auth-tab.active{background:rgba(139,124,246,.11)!important;box-shadow:inset 0 0 0 1px rgba(139,124,246,.14)!important}.auth-security i{color:var(--accent)!important}
+.auth-card,.admin-table-card,.admin-stat,.result-card,.product-main,.product-side,.form-card,.ticket-card{border-color:var(--border)!important}
 footer a:hover{color:#fff!important}
-@keyframes nc-pulse{0%,100%{opacity:.62;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+/* Neutralize legacy hard-coded purple/amber declarations that may remain in page styles. */
+.hero,.store-hero{color:var(--text-main)}
+.btn-primary,.btn-primary:hover{color:#fff!important}
+.form-icon{border-color:var(--accent-line)!important;background:var(--accent-soft)!important;color:#a99cff!important}
+.store-icon{border-color:var(--accent-line)!important;background:var(--accent-soft)!important;color:#a99cff!important}
+.visual-center i{color:var(--accent)!important}
+/* Keep the new visual language stable across older component selectors. */
+[class*="accent"],.accent,.highlight{color:var(--accent)!important}
+@media(max-width:760px){.container{width:min(100% - 28px,1160px)!important}.nav-links{gap:2px!important}.nav-links a{padding:7px 8px!important}.hero,.store-hero{padding-top:88px!important}.section,.page-shell{padding:68px 0!important}}
