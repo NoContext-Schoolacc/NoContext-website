@@ -3,9 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NoContext | Privacy</title>
-<meta name="description" content="NoContext privacy information and responsible data handling practices.">
-<link rel="stylesheet" href="../assets/css/style.css?v=privacy2">
+<title>NoContext | Privacy Policy</title>
+<meta name="description" content="NoContext Privacy Policy explaining what account, support, license, and security data the service collects and how it is used.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://nocontext-schoolacc.github.io/NoContext-website/privacy/">
+<link rel="stylesheet" href="../assets/css/style.css?v=privacy3">
+<link rel="stylesheet" href="../assets/css/theme.css?v=privacy3">
 </head>
 <body>
 <nav aria-label="Primary navigation"><div class="container">
@@ -13,6 +16,51 @@
 <ul class="nav-links"><li><a href="../">Home</a></li><li><a href="../#features">Features</a></li><li><a href="../store/">Store</a></li><li><a href="../about/">About</a></li><li><a href="../updates/">Updates</a></li><li><a href="../faq/">FAQ</a></li><li><a href="../contact/">Contact</a></li></ul>
 <a href="../key/" class="btn btn-primary">Get Started</a>
 </div></nav>
-<header class="hero"><div class="container"><span class="home-kicker">PRIVACY</span><h1>Your data.<br><span>Your control.</span></h1><p>NoContext respects user privacy and responsible data handling.</p></div></header>
+<header class="hero"><div class="container"><span class="home-kicker">PRIVACY POLICY</span><h1>Your data.<br><span>Your control.</span></h1><p>How NoContext handles information used for accounts, licenses, support, security, and site operation.</p></div></header>
+<section class="section"><div class="container"><div class="card">
+<h2>Last updated</h2><p>September 11, 2026</p>
+<h2>1. What this policy covers</h2><p>This Privacy Policy explains what information the NoContext website and its backend services collect, why that information is processed, and the choices available to you. It is written to match the data fields and processing currently implemented by the NoContext website.</p>
+<h2>2. Information you provide</h2>
+<ul>
+<li><strong>Account information:</strong> your chosen username and, when you create a password-based account, a securely derived password hash and salt. No plain-text password is stored by the application.</li>
+<li><strong>Discord account information:</strong> if you use Discord sign-in, the service receives and stores your Discord user ID, Discord username/display name, and avatar identifier returned by Discord.</li>
+<li><strong>Support information:</strong> if you open a support ticket, we store the ticket category, priority, subject, description, status, timestamps, and messages you send. Staff replies are also stored so the conversation can be maintained.</li>
+<li><strong>License information:</strong> license records can include a securely hashed license key, product identifier, license status, expiration time, claim/validation timestamps, and securely hashed verification-token information used by the license system.</li>
+</ul>
+<h2>3. Information collected automatically</h2>
+<p>The backend records limited operational information for security, abuse prevention, and troubleshooting. This currently includes:</p>
+<ul>
+<li>a keyed cryptographic hash of the IP address associated with certain license-claim attempts;</li>
+<li>a keyed cryptographic hash of the IP address associated with client-error reports;</li>
+<li>short client error information, including an event type, a truncated error message, and the page path where the error occurred; and</li>
+<li>technical session information needed to keep an authenticated account signed in.</li>
+</ul>
+<p>The client monitoring code is designed to send only the short error information described above. It does not intentionally collect passwords, license keys, or the contents of support tickets through the error-monitoring endpoint.</p>
+<h2>4. Cookies and sessions</h2>
+<p>NoContext uses an HTTP-only session cookie to maintain signed-in sessions. In production, the session cookie is marked Secure and uses SameSite=Lax. Session records expire after seven days, and a new login replaces prior sessions for that account.</p>
+<p>Discord sign-in also uses a short-lived security-state cookie. The state is stored server-side as a keyed hash and expires after approximately ten minutes. These cookies are functional authentication/security cookies, not advertising cookies.</p>
+<h2>5. How information is used</h2>
+<p>Information is used to provide and secure the service, including to create and authenticate accounts, connect optional Discord sign-in, issue and validate licenses, provide support tickets, prevent abuse, enforce rate limits, troubleshoot client errors, maintain service security, and operate the website.</p>
+<h2>6. Third-party services</h2>
+<p>NoContext can interact with third-party services when a feature requires them:</p>
+<ul>
+<li><strong>Discord:</strong> optional Discord authentication sends the OAuth authorization request to Discord and uses the Discord API to obtain the profile information described above. Discord's own privacy practices apply to information processed by Discord.</li>
+<li><strong>Work.ink:</strong> the license-claim flow can use Work.ink verification links/tokens. Information handled by Work.ink is subject to Work.ink's own policies.</li>
+<li><strong>Payment providers:</strong> the website contains a checkout integration point intended for a payment provider. The current backend can return a checkout-unavailable response until payment configuration is enabled. If payments are enabled, payment information should be processed by the configured provider under that provider's terms and privacy policy rather than stored as raw card data by the NoContext frontend.</li>
+</ul>
+<h2>7. What we do not intentionally store</h2>
+<p>The current application is designed so that account passwords are not stored in plain text, license keys are stored as cryptographic hashes where they are persisted, and session tokens are stored as cryptographic hashes rather than raw session tokens. Do not submit passwords, API keys, session tokens, or other credentials in support tickets.</p>
+<h2>8. Data retention</h2>
+<p>Information is retained for as long as it is needed for the purposes described in this policy, including account operation, license administration, support history, security, and troubleshooting. The application automatically expires seven-day login sessions and ten-minute Discord OAuth states. Other records, such as accounts, tickets, licenses, and security logs, do not currently have an automatic deletion period in the application code.</p>
+<h2>9. Security</h2>
+<p>NoContext uses measures including HTTPS requirements for production Discord callbacks, HTTP-only/Secure/SameSite cookies, cryptographic hashing for sensitive stored tokens, password hashing with scrypt, rate limiting, same-origin checks on state-changing requests, parameterized database queries, and security-related HTTP headers. No online service can guarantee absolute security.</p>
+<h2>10. Your choices and privacy requests</h2>
+<p>You may stop using the service and may request information about or deletion of personal information associated with your account where applicable. Because the current site does not provide a self-service account deletion control, privacy requests can be submitted through the <a href="../contact/">Contact</a> page. We may need to verify that a request relates to the account concerned before acting on it.</p>
+<h2>11. Changes to this policy</h2>
+<p>This policy may be updated when the website's features, data processing, or legal requirements change. The “Last updated” date at the top of this page will be changed when material revisions are made. Continued use of the service after an update means the revised policy applies to future use.</p>
+<h2>12. Contact</h2>
+<p>For privacy questions or requests, use the <a href="../contact/">NoContext support page</a>. Please do not include passwords, API keys, session tokens, or other secret credentials in a privacy request or support ticket.</p>
+</div></div></section>
+<footer><div class="container"><a href="../about/">About</a> · <a href="../updates/">Updates</a> · <a href="../faq/">FAQ</a> · <a href="../contact/">Contact</a> · <a href="./" aria-current="page">Privacy</a> · <a href="../terms/">Terms</a></div></footer>
 </body>
 </html>
