@@ -11,7 +11,11 @@ const API_CONFIG = Object.freeze({
     ENDPOINTS: Object.freeze({
         CLAIM_KEY: '/api/keys/claim',
         VALIDATE_LICENSE: '/api/license/validate',
-        CREATE_STRIPE_SESSION: '/api/store/checkout'
+        CREATE_STRIPE_SESSION: '/api/store/checkout',
+        AUTH_REGISTER: '/api/auth/register',
+        AUTH_LOGIN: '/api/auth/login',
+        AUTH_LOGOUT: '/api/auth/logout',
+        AUTH_ME: '/api/auth/me'
     })
 });
 
@@ -33,8 +37,21 @@ async function request(endpoint, options = {}) {
         redirect: 'error'
     });
 
-    if (!response.ok) throw new Error(`Request failed with status ${response.status}.`);
-    return response.json();
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null;
+    }
+
+    if (!response.ok) {
+        const message = data?.error || `Request failed with status ${response.status}.`;
+        const error = new Error(message);
+        error.status = response.status;
+        throw error;
+    }
+
+    return data;
 }
 
 const ApiService = {
@@ -72,5 +89,35 @@ const ApiService = {
             method: 'POST',
             body: JSON.stringify({ productId })
         });
+    },
+
+    async register(username, password) {
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            throw new Error('Invalid registration details.');
+        }
+
+        return request(API_CONFIG.ENDPOINTS.AUTH_REGISTER, {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+    },
+
+    async login(username, password) {
+        if (typeof username !== 'string' || typeof password !== 'string') {
+            throw new Error('Invalid login details.');
+        }
+
+        return request(API_CONFIG.ENDPOINTS.AUTH_LOGIN, {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+    },
+
+    async logout() {
+        return request(API_CONFIG.ENDPOINTS.AUTH_LOGOUT, { method: 'POST' });
+    },
+
+    async getCurrentUser() {
+        return request(API_CONFIG.ENDPOINTS.AUTH_ME, { method: 'GET' });
     }
 };
