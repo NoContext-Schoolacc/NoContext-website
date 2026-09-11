@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <meta name="api-base" content="">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com 'unsafe-inline'; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'">
+    <title>Admin | NoContext</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body class="admin-page">
+<nav><div class="container"><a href="../" class="logo"><i class="fas fa-cube"></i> NoContext</a><ul class="nav-links"><li><a href="../store/">Store</a></li><li><a href="../account/">License</a></li></ul></div></nav>
+<main class="page-shell">
+    <div class="container admin-container">
+        <div class="page-kicker">ADMIN / CONTROL</div>
+        <h1 class="page-title">License dashboard</h1>
+        <p class="page-lead">Private operator tools for license visibility and revocation.</p>
+
+        <section class="card form-card admin-auth-card" aria-labelledby="auth-heading">
+            <div class="form-card-heading"><div class="form-icon"><i class="fas fa-lock"></i></div><div><h2 id="auth-heading">Admin authentication</h2><p>The admin key is kept only in this tab and is never written to page storage.</p></div></div>
+            <div class="input-group"><label for="admin-token">Admin API key</label><input type="password" id="admin-token" autocomplete="off" spellcheck="false" placeholder="Enter admin key"></div>
+            <button id="load-dashboard" class="btn btn-primary form-submit" type="button">Open dashboard <i class="fas fa-arrow-right"></i></button>
+            <p id="admin-auth-status" class="admin-message" role="status"></p>
+        </section>
+
+        <section id="admin-dashboard" class="admin-dashboard" hidden>
+            <div class="admin-toolbar"><div><div class="page-kicker">LIVE DATA</div><h2>Overview</h2></div><button id="refresh-dashboard" class="btn btn-outline" type="button">Refresh <i class="fas fa-rotate"></i></button></div>
+            <div class="admin-stats">
+                <div class="card admin-stat"><span>Total</span><strong id="stat-total">—</strong></div>
+                <div class="card admin-stat"><span>Active</span><strong id="stat-active">—</strong></div>
+                <div class="card admin-stat"><span>Expired</span><strong id="stat-expired">—</strong></div>
+                <div class="card admin-stat"><span>Revoked</span><strong id="stat-revoked">—</strong></div>
+            </div>
+            <div class="card admin-table-card">
+                <div class="admin-table-heading"><div><h2>Recent licenses</h2><p>Keys are never displayed because only hashes are stored server-side.</p></div><span id="admin-data-status" class="admin-data-status">Waiting</span></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Product</th><th>Status</th><th>Expires</th><th>Created</th><th>Action</th></tr></thead>
+                        <tbody id="license-rows"><tr><td colspan="6" class="empty-table">Authenticate to load licenses.</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+<footer><div class="container"><p>&copy; 2026 NoContext. All rights reserved.</p></div></footer>
+<script src="../assets/js/monitoring.js"></script>
+<script src="../assets/js/admin.js"></script>
+</body>
+</html>
